@@ -23,3 +23,5 @@ one option for formatting that tracks testing over time, which would create a ta
 tested (so you will likely have many tables). Grade is based on how rigorous/complete your testing was,
 how you tracked and reported it, not whether you actually passed the tests or not (those errors are
 deducted in part (b) or (c))
+
+to start a port: python3 -m http.server 8080
