@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-
+  
   <nav>
     <ul>
       <li><strong>Acme Corp</strong></li>
@@ -28,7 +28,7 @@
     <input type="text" name="yv" id="yv" placeholder="Y-Variable">
     <input type="submit">
   </form> -->
-
+  
     <form action= "" onsubmit="showCustomer()">
         <input type= "text" name= "Company_name" id= "company" placeholder= "Enter a company name">
         <input type="date" name="date1" id="date1" placeholder = "Enter starting date">
@@ -39,7 +39,15 @@
   <!-- This Div with id=tester is used to act as a placeholder for the plot. -->
   <div id="tester" style="width:600px;height:250px;"></div>
 
+
+  
   <script>
+
+    // Set max allowed date (today) for the date inputs
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById("date1").max = today;
+    document.getElementById("date2").max = today;
+    
     // This function is in a script tag, indicating javascript, it is called when we
     // click the submit button on the form above.
     function showCustomer() {
@@ -51,7 +59,12 @@
       str = document.getElementById("company").value;
       xt = document.getElementById("date1").value;
       yt = document.getElementById("date2").value;
-
+      
+// Prevent selecting a date later than today
+      if (xt > today || yt > today) {
+        alert("Dates cannot be later than today.");
+        return;
+      }
 
       // This is how you join the strings into one big one.
       str = xt + "," + yt + "," + str;
