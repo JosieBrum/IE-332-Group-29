@@ -60,12 +60,18 @@
       xt = document.getElementById("date1").value;
       yt = document.getElementById("date2").value;
       
-// Prevent selecting a date later than today
+// Prevent selecting a date later than todays date
       if (xt > today || yt > today) {
         alert("Dates cannot be later than today.");
         return;
       }
+// Prevent the Initial Date from being later than the Final Date
+      if (xt > yt) {
+      alert("Initial date cannot be later than Final date.");
+      return;
+      }
 
+      
       // This is how you join the strings into one big one.
       str = xt + "," + yt + "," + str;
 
