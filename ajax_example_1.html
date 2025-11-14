@@ -99,7 +99,11 @@
         // This if statement checks if we're ready and the php file returned a "working"
         // result (i.e. html status code 200, look this up if curious or confused.)
         if (this.readyState == 4 && this.status == 200) {
-
+          if (this.responseText.trim() === "Company Name Not Found.") {
+          alert("The Company Name Does Not Exist In The Database.");
+          alert("Please Try Again.");
+                return;
+          }
           // Since we have our php file returning the code in JSON, we need to parse the string as JSON.
           // this produces a list of Key-Value-Pairs, which are indexed by the key names, which we need to grab from
           // xt and yt variable from before. We do this, in this section of the code eval(`item.${xt}`) } below.
