@@ -123,6 +123,13 @@
             });
           }
 
+          function deleteChart(chart) {
+            if (!chart) return false;
+            if (typeof chart.destroy === 'function') {
+              try { chart.destroy(); } catch (e) { /* ignore */ }
+            }
+          }
+
           let html = `Company Name: ${temp[0][0][0]} </br>`;
           html+= `Tier: ${temp[0][0][1]} </br>`
           html+= `Type: ${temp[0][0][2]} </br>`
@@ -136,12 +143,14 @@
             let categoriespercents = temp[0][4];
             html+= `Catagories: </br>`;
             html += "<table>"
+            deleteChart(myChart);
             createpiecharts(categorie, categoriespercents);
           }
           if (temp[0][0][2]=="Distributor"){
             html+= `Routes: </br>`;
             let Distributors = temp[0][1];
             html += makeTableHTMLColoumns(Distributors);
+            deleteChart(myChart);
           }
 
 
