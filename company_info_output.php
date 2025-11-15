@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 }
 
 $tmp= $_GET['q'];
-$tmp=explode(',',$tmp);
+$tmp=explode('|',$tmp);
 $companyName = $tmp[2];
 date_default_timezone_set('America/New_York'); 
 if (!empty($tmp[0]) && !empty($tmp[1])) {
@@ -48,7 +48,7 @@ $sql1 = "
         ON Company.LocationID = Location.LocationID
     LEFT JOIN Manufacturer 
         ON Company.CompanyID = Manufacturer.CompanyID
-    WHERE Company.CompanyName LIKE '".$companyName."'
+    WHERE Company.CompanyName = '".$companyName."'
 ";
 
 // Query 3 for Products 
@@ -65,12 +65,23 @@ $sql3 = "Select category, count(Category)
         Group By Category
 ";
 
+// Query 4 for Distributors routes  
+$sql4 = "SELECT F.CompanyName AS FromCompany, T.CompanyName As ToCompany
+    FROM OperatesLogistics
+    JOIN Company F ON F.CompanyID = OperatesLogistics.FromCompanyID
+    JOIN Company T ON T.CompanyID = OperatesLogistics.ToCompanyID 
+    WHERE DistributorID = (
+    SELECT CompanyID
+    FROM Company
+    WHERE CompanyName = '".$companyName."'
+    AND TYPE = 'Distributor' )
+";
 
 // run quieres 
 $result1=mysqli_query($conn,$sql1);
 $result2=mysqli_query($conn,$sql2);
 $result3=mysqli_query($conn,$sql3);
-
+$result4=mysqli_query($conn,$sql4);
 
 
 // Display results
@@ -80,29 +91,49 @@ if (!$result1 || $result1->num_rows == 0) {
     exit();
 }
 else {
+    $preput = array();
     while ($row = mysqli_fetch_array($result1)) {
-        $output[] = $row["CompanyName"];
-        $output[] =  $row['TierLevel']; 
-        $output[] =  $row['Type']; 
-        $output[] =  $row["City"];
-        $output[] =  $row["CountryName"];
-        $output[] = $row["ContinentName"];
-        //$products = array();
+        $basic = array(
+            $row["CompanyName"],
+            $row["TierLevel"],
+            $row["Type"],
+            $row["City"],
+            $row["CountryName"],
+            $row["ContinentName"],
+        );
+        $preput[] = $basic;
         if($row["Type"] == "Manufacturer") {
-            $output[] = $row["FactoryCapacity"];
+            $preput[] = $row["FactoryCapacity"];
+            $products = array();
             while ($row2 = mysqli_fetch_array($result2)) {
-                $output[] =  $row2["ProductName"];
+                $products[] = $row2["ProductName"];
             }
-            $countcatagories = array();
+            $preput[] = $products;
+            $countcategories = array();
+            $category = array();
+            $percentages = array();
             while ($row3 = $result3->fetch_assoc()) {
-                $output[] = $row3['category'];
-                $countcatagories[] = $row3['count(Category)'];
+                $category[] = $row3['category'];
+                $countcategories[] = $row3['count(Category)'];
             }
-            foreach ($countcatagories as $value)
-            $output[] = ($value/array_sum($countcatagories))*100;
+            $preput[] = $category;
+            foreach ($countcategories as $value) {
+                $percentages[] = ($value/array_sum($countcategories))*100;
+            }
+            $preput[] = $percentages;
         }
+        $route = array();
+        if($row['Type'] == 'Distributor'){
+            while ($row4 = $result4->fetch_assoc()) {
+                $route[] = $row4["FromCompany"] . " to " . $row4["ToCompany"];
+            }
+            $preput[] = $route;
+        }
+        $output[] = $preput;
     }
 }
 echo json_encode($output);
 $conn->close();
+?>
+
 ?>
