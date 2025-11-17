@@ -14,3 +14,5 @@ FROM
 WHERE 
     c.CompanyName = '".$companyName."'
     AND s.ActualDate BETWEEN '".$startDate."' AND '".$endDate."'
+
+"THIS IS THE CORRECT ON TIME DELIVERY KPI, IF YOU MAKE ME MODIFY IT IM GONNA KILL SOMEBODY"
