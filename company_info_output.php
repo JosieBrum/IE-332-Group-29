@@ -104,6 +104,8 @@ $sql4 = "SELECT F.CompanyName AS FromCompany, T.CompanyName As ToCompany
     AND TYPE = 'Distributor' )
 ";
 
+// Queries 5-8 for Health Score  
+
 $sql5 = "Select Quarter, RepYear, HealthScore From Company Inner Join FinancialReport On Company.CompanyID = FinancialReport.CompanyID 
 WHERE ((FinancialReport.RepYear = '".$year1."' and FinancialReport.Quarter>= '".$quarter1."') AND CompanyName = '".$companyName."') ";
 
@@ -201,4 +203,5 @@ else {
 }
 echo json_encode($output);
 $conn->close();
+
 ?>
