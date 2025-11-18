@@ -84,13 +84,41 @@ $sql2 = " SELECT ProductName
             WHERE productid in (SELECT ProductID FROM SuppliesProduct Where SupplierID = (SELECT CompanyID FROM Company where CompanyName = '".$companyName."'))
 ";
 
-$sql3 = "Select category, count(Category) 
-        FROM Product 
-        WHERE productid in 
-        (select productId from SuppliesProduct 
-        where supplierid = (select companyid from Company where companyname = '".$companyName."')) 
-        Group By Category
-";
+// catageory perentages 
+$sql3 = "SELECT 
+    s.Category,
+    (s.CategoryCount/t.TotalCategoryCount)*100 as PER
+FROM (
+SELECT Category, COUNT(Category) AS CategoryCount
+            FROM Product
+            WHERE ProductID IN (
+                SELECT ProductID 
+                FROM SuppliesProduct
+                WHERE SupplierID = (
+                    SELECT CompanyID 
+                    FROM Company 
+                    WHERE CompanyName = '".$companyName."'
+                )
+            )
+            GROUP BY Category
+    ) AS s
+CROSS JOIN(
+        SELECT SUM(CategoryCount) AS TotalCategoryCount
+        FROM (
+            SELECT Category, COUNT(Category) AS CategoryCount
+            FROM Product
+            WHERE ProductID IN (
+                SELECT ProductID 
+                FROM SuppliesProduct
+                WHERE SupplierID = (
+                    SELECT CompanyID 
+                    FROM Company 
+                    WHERE CompanyName = '".$companyName."'
+                )
+            )
+            GROUP BY Category
+        ) AS s
+    ) AS t ";
 
 // Query 4 for Distributors routes  
 $sql4 = "SELECT F.CompanyName AS FromCompany, T.CompanyName As ToCompany
@@ -104,8 +132,7 @@ $sql4 = "SELECT F.CompanyName AS FromCompany, T.CompanyName As ToCompany
     AND TYPE = 'Distributor' )
 ";
 
-// Queries 5-8 for Health Score  
-
+//Finhealth
 $sql5 = "Select Quarter, RepYear, HealthScore From Company Inner Join FinancialReport On Company.CompanyID = FinancialReport.CompanyID 
 WHERE ((FinancialReport.RepYear = '".$year1."' and FinancialReport.Quarter>= '".$quarter1."') AND CompanyName = '".$companyName."') ";
 
@@ -118,6 +145,23 @@ WHERE (FinancialReport.RepYear > '".$year1."' and FinancialReport.RepYear < '".$
 $sql8 = "Select Quarter, RepYear, HealthScore From Company Inner Join FinancialReport On Company.CompanyID = FinancialReport.CompanyID 
 WHERE (FinancialReport.RepYear = '".$year2."' and FinancialReport.Quarter>= '".$quarter1."' and FinancialReport.Quarter<= '".$quarter2."' AND CompanyName = '".$companyName."') ";
 
+// who depends on them 
+$sql9 = "SELECT C2.CompanyName
+FROM Company c
+JOIN DependsOn D ON D.UpstreamCompanyID = c.CompanyID
+JOIN Company C2 ON C2.CompanyID = D.DownstreamCompanyID
+WHERE c.CompanyName = '".$companyName."'
+ORDER BY c.CompanyName ";
+
+//Who they depend on 
+$sql10 = "SELECT C2.CompanyName
+FROM Company c
+JOIN DependsOn D ON D.DownstreamCompanyID = c.CompanyID
+JOIN Company C2 ON C2.CompanyID = D.UpstreamCompanyID
+WHERE c.CompanyName = '".$companyName."'
+ORDER BY c.CompanyName ";
+
+
 // run quieres 
 $result1=mysqli_query($conn,$sql1);
 $result2=mysqli_query($conn,$sql2);
@@ -127,6 +171,8 @@ $result5=mysqli_query($conn,$sql5);
 $result6=mysqli_query($conn,$sql6);
 $result7=mysqli_query($conn,$sql7);
 $result8=mysqli_query($conn,$sql8);
+$result9=mysqli_query($conn,$sql9);
+$result10=mysqli_query($conn,$sql10);
 
 
 // Display results
@@ -154,18 +200,14 @@ else {
                 $products[] = $row2["ProductName"];
             }
             $preput[] = $products;
-            $countcategories = array();
-            $category = array();
-            $percentages = array();
+            $categories = array();
+            $percentages_catagory = array();
             while ($row3 = $result3->fetch_assoc()) {
-                $category[] = $row3['category'];
-                $countcategories[] = $row3['count(Category)'];
+                $categories[] = $row3['Category'];
+                $percentages_catagory[] = $row3['PER'];
             }
-            $preput[] = $category;
-            foreach ($countcategories as $value) {
-                $percentages[] = ($value/array_sum($countcategories))*100;
-            }
-            $preput[] = $percentages;
+            $preput[] = $categories;
+            $preput[] = $percentages_catagory;
         }
         $route = array();
         if($row['Type'] == 'Distributor'){
@@ -194,14 +236,24 @@ else {
             while ($row6 = $result6->fetch_assoc()) {
                 $quarters[] = $row6["RepYear"] . "(" . $row6["Quarter"] . ")";
                 $scores[] = $row6["HealthScore"];
-            }
+            }   
         }
         $preput[] = $quarters;
         $preput[] = $scores;
+        $whodependsonthem = array();
+        while ($row9 = $result9->fetch_assoc()) {
+            $whodependsonthem[] = $row9["CompanyName"];
+        }
+        $preput[] = $whodependsonthem;
+        $dependson = array();
+        while ($row10 = $result10->fetch_assoc()) {
+            $dependson[] = $row10["CompanyName"];
+        }
+        $preput[] = $dependson;
         $output[] = $preput;
+
     }
 }
 echo json_encode($output);
 $conn->close();
-
 ?>
