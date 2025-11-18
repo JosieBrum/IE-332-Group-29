@@ -1,0 +1,360 @@
+<html>
+<!-- https://apexcharts.com/javascript-chart-demos/dashboards/modern/ -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"> <!-- input form style -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  
+  <link rel="stylesheet" href="styles.css" />  <!-- general css style -->
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <title>Company Information V2</title>
+
+</head>
+
+<body>
+
+  <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+ <!-- https://www.wrappixel.com/templates/materialm-free-bootstrap-admin/ -->
+
+      <!-- Navbar -->
+      <nav class="navbar navbar-light" style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Logo -->
+        <a class="navbar" href="index.html">
+          <img src="Logo" alt="INSERT LOGO HERE" />
+        </a>
+        <!-- Links -->
+        <div style="display: flex; gap: 15px;">
+          <a href="https://www.wrappixel.com/templates/materialm-admin-dashboard-template/?ref=33"
+              class="navbar" target="_blank">
+              Optional Link #1
+          </a>
+          <a href="https://apexcharts.com/javascript-chart-demos/dashboards/modern/"
+              class="navbar" target="_blank">
+              Optional Link #2
+          </a>
+        </div>
+      </nav>
+        
+     <!-- Page Title --> 
+    <h3>Company Information</h3>
+
+  <div class="box shadow">
+    <!-- This form is used to get user input for the company name and date range -->
+    <form action= "" onsubmit="showCustomer()">
+        <div style="display: grid; grid-template-columns: 3fr 1fr 1fr auto; gap: 10px; align-items: end;">
+          <input type= "text" name= "Company_name" id= "company" placeholder= "Enter a company name" >
+          <input type="date" name="date1" id="date1" placeholder = "Enter starting date">
+          <input type= "date" name ="date2"id="date2" placeholder = "Enter ending date">
+          <input type= "submit" name = "submit-btn" value="Search">
+        </div>
+    </form>
+  </div>
+    
+
+  <script>
+    // This function is in a script tag, indicating javascript, it is called when we
+    // click the submit button on the form above.
+    function showCustomer() {
+      // These 3 strings are retrieved from the table above and joined into one string
+      // separated by commas in the format the php file expects to find after the ?q=
+      // part. 
+
+      // This part gets the strings from the table.
+      str = document.getElementById("company").value.trim();
+      xt = document.getElementById("date1").value;
+      yt = document.getElementById("date2").value;
+
+      // Validate dates
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+      
+      const startDate = new Date(xt);
+      const endDate = new Date(yt);
+
+      // Check if end date is before start date
+      if (endDate < startDate) {
+        alert("Error: The ending date cannot be before the starting date.");
+        event.preventDefault();
+        return;
+      }
+
+      // Check if either date is after today
+      if (startDate > today) {
+        alert("Error: The starting date cannot be after today's date.");
+        event.preventDefault();
+        return;
+      }
+
+      if (endDate > today) {
+        alert("Error: The ending date cannot be after today's date.");
+        event.preventDefault();
+        return;
+      }
+
+      // This is how you join the strings into one big one.
+      str = xt + "|" + yt + "|" + str;
+      console.log(str);
+      
+
+
+      // This thing is weird and you don't always need it, but I think you need it specifically
+      // for submit button based pages.
+      event.preventDefault();
+
+      // Here is where we start defining the XHTTP request that JS uses to call the php file 
+      // with the variables.
+      var xhttp;
+      if (str == "") {
+        // If the table variable/query variable is empty, make sure we're not displaying anything in temp. 
+        // This isn't necessary in this example, but could be useful for particular configurations.
+        document.getElementById("temp").innerHTML = "";
+        return;
+      }
+      // this is where we define the actual request.
+      xhttp = new XMLHttpRequest();
+
+      // This function is called when the request loads from the php file.
+      xhttp.onload = function () {
+        // This if statement checks if we're ready and the php file returned a "working"
+        // result (i.e. html status code 200, look this up if curious or confused.)
+        if (this.readyState == 4 && this.status == 200) {
+
+          // Since we have our php file returning the code in JSON, we need to parse the string as JSON.
+          // this produces a list of Key-Value-Pairs, which are indexed by the key names, which we need to grab from
+          // xt and yt variable from before. We do this, in this section of the code eval(`item.${xt}`) } below.
+          //nsole.log(this.responseText);
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+          // https://stackoverflow.com/questions/14643617/create-table-using-javascript
+          function makeTableHTML(myArray) {
+            var result = "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'>";
+            for(var i=0; i<myArray.length; i++) {
+                result += "<div>"+myArray[i]+"</div>";
+            }
+            result += "</div>";
+            return result;
+          }
+          //https://stackoverflow.com/questions/14643617/create-table-using-javascript
+          function makeTableHTMLColoumns(myArray) {
+            var result = "<div style='display: grid; grid-template-columns: 1fr; gap: 10px;'>";
+            for(var i=0; i<myArray.length; i++) {
+                result += "<div>" + myArray[i] + "</div>";
+            }
+            result +="</div>";
+            return result;
+          }
+
+
+
+          //https://www.apexcharts.com/javascript-chart-demos/pie-charts/monochrome-pie/
+          function createpiecharts(data1,data2, id, legendlabel, borderwidth, hoveroffset) {
+            if (window.myPieChart) {
+              window.myPieChart.destroy();
+            }
+            
+            // Random color selection for monochrome theme
+            const colors = ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#546E7A', '#26a69a', '#FF6178'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            var options = {
+              series: data2,
+              chart: {
+                width: '100%',
+                height: 350,
+                type: 'pie',
+              },
+              labels: data1,
+              theme: {
+                monochrome: {
+                  enabled: true,
+                  color: randomColor,
+                  shadeTo: 'light',
+                  shadeIntensity: 0.65
+                },
+              },
+              plotOptions: {
+                pie: {
+                  dataLabels: {
+                    offset: -5,
+                  },
+                },
+              },
+              dataLabels: {
+                formatter(val, opts) {
+                  const name = opts.w.globals.labels[opts.seriesIndex]
+                  return [name, val.toFixed(1) + '%']
+                },
+              },
+              legend: {
+                show: true,
+                position: 'bottom',
+              },
+            };
+            
+            window.myPieChart = new ApexCharts(document.querySelector("#" + id), options);
+            window.myPieChart.render();
+          }
+
+
+
+          //https://apexcharts.com/javascript-chart-demos/line-charts/basic/
+          function createlinecharts(xdata,ydata,legendlabel,bordercolor, tension, sizex, xlabel,ylabel, sizey, id) {
+            if (window.myLineChart) {
+              window.myLineChart.destroy();
+            }
+            
+            var options = {
+              series: [{
+                name: legendlabel,
+                data: ydata
+              }],
+              chart: {
+                height: 350,
+                type: 'line',
+                zoom: {
+                  enabled: false
+                }
+              },
+              dataLabels: {
+                enabled: false
+              },
+              stroke: {
+                curve: 'straight',
+                colors: [bordercolor]
+              },
+              grid: {
+                row: {
+                  colors: ['#f3f3f3', 'transparent'],
+                  opacity: 0.5
+                },
+              },
+              xaxis: {
+                categories: xdata,
+                title: {
+                  text: xlabel
+                }
+              },
+              yaxis: {
+                title: {
+                  text: 'Financial Health Score'
+                }
+              }
+            };
+
+            window.myLineChart = new ApexCharts(document.querySelector("#" + id), options);
+            window.myLineChart.render();
+          }
+
+
+          const companyName = temp[0][0][0];
+          const tier = temp[0][0][1];
+          const type = temp[0][0][2];
+          const locationText = `${temp[0][0][3]}, ${temp[0][0][4]}, ${temp[0][0][5]}`;
+
+          let html = `<h3></br>${companyName}</h3>`;
+          html += `<div class="row mt-4 mb-5">`;
+          html += `  <div class="col-md-6">`;
+          html += `    <div class="row sparkboxes mt-4">`;
+          html += `      <div class="col-md-6"><div class="box box1"><h6>Tier</h6>${tier}</div></div>`;
+          html += `      <div class="col-md-6"><div class="box box2"><h6>Type</h6>${type}</div></div>`;
+          html += `    </div>`;
+          html += `    <div class="row sparkboxes mt-3">`;
+          html += `      <div class="col-md-6"><div class="box box3"><h6>Location</h6>${locationText}</div></div>`;
+          if (type == "Manufacturer") {
+            const capacity = temp[0][1];
+            let products = temp[0][2];
+            html += `      <div class="col-md-6"><div class="box box4"><h6>Capacity</h6>${capacity}</div></div>`;
+            html += `    </div>`; // close second sparkboxes row
+            html += `  </div>`;   // close left col-md-6
+            html += `  <div class="col-md-6 mt-4"><div class="box shadow"><h6>Products</h6>${makeTableHTML(products)}</div></div>`;
+            html += `</div>`;     // close outer row
+          } else if (type == "Distributor") {
+            let Distributors = temp[0][1];
+            const routesCount = Array.isArray(Distributors) ? Distributors.length : 0;
+            html += `      <div class="col-md-6"><div class="box box4"><h6>Routes</h6>${routesCount}</div></div>`;
+            html += `    </div>`; // close second sparkboxes row
+            html += `  </div>`;   // close left col-md-6
+            html += `  <div class="col-md-6 mt-4"><div class="box shadow"><h6>Routes</h6>${makeTableHTMLColoumns(Distributors)}</div></div>`;
+            html += `</div>`;     // close outer row
+            // Clear pie chart for non-manufacturers
+            if (window.myPieChart) {
+              window.myPieChart.destroy();
+              window.myPieChart = null;
+            }
+          } else {
+            html += `    </div>`; // close second sparkboxes row
+            html += `  </div>`;   // close left col-md-6
+            html += `</div>`;     // close outer row
+            // Clear pie chart for non-manufacturers
+            if (window.myPieChart) {
+              window.myPieChart.destroy();
+              window.myPieChart = null;
+            }
+          }
+
+          // Add chart row based on company type
+          html += `<div class="row mt-4 mb-5">`;
+          if (type == "Manufacturer") {
+            html += `  <div class="col-md-4">`;
+            html += `    <div class="box shadow" style="height: 100%;">`;
+            html += `      <h6>Categories</h6> <div id="myChart"></div>`;
+            html += `    </div>`;
+            html += `  </div>`;
+            html += `  <div class="col-md-8">`;
+            html += `    <div class="box shadow" style="height: 100%;">`;
+            html += `      <h6>Financial Health Status</h6> <div id="myChartLine"></div>`;
+            html += `    </div>`;
+            html += `  </div>`;
+          } else {
+            html += `  <div class="col-md-12">`;
+            html += `    <div class="box shadow">`;
+            html += `      <h6>Financial Health Status</h6> <div id="myChartLine"></div>`;
+            html += `    </div>`;
+            html += `  </div>`;
+          }
+          html += `</div>`;
+
+          var tempEl = document.getElementById("temp");
+          tempEl.innerHTML = html;
+          
+          // Create charts AFTER HTML is inserted into DOM
+          if (type == "Manufacturer") {
+            createpiecharts(temp[0][3], temp[0][4], "myChart", '% of each category', 2, 4);
+          }
+          createlinecharts(temp[0][5], temp[0][6], 'Financial Health', 'rgb(75, 192, 192)', 0.1, 14, 'Quarter / Year', 'Health Score', 14, "myChartLine");
+        }
+      };
+
+      
+
+      // This portion actually runs the HTTP request to the php file using the variables set in the table
+      // and concatenated on line 49 into the str variable which contains x_variable,y_variable,table
+      // but replace the placeholders with whatever variables/table  you're trying to query.
+      var url = "company_info_output.php?q=" + encodeURIComponent(str);
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+  </script>
+
+  <div id="temp"></div>
+
+
+        </div>
+      </div>
+    </div>
+  </body>
+
+<!-- https://web.ics.purdue.edu/~brumfij/company_info_page_josie_v2 -->
+
+</html>
