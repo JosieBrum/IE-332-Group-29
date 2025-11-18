@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="styles.css?v=2" />
+
+  <style>
+    #wrapper {
+      padding-bottom: 50px;
+    }
+    
+    .feature-section {
+      margin-top: 60px;
+      margin-bottom: 40px;
+    }
+    
+    .feature-card {
+      background-color: #fff;
+      padding: 40px;
+      box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.08);
+      border-radius: 5px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .feature-card i {
+      font-size: 48px;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    
+    .feature-card h4 {
+      margin-bottom: 15px;
+    }
+    
+    .feature-card p {
+      color: #777;
+      margin-bottom: 20px;
+    }
+    
+    .feature-card .btn {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: #fff;
+    }
+  </style>
+
+  <title>Dashboard</title>
+</head>
+
+<body>
+  <div id="wrapper">
+    <div class="content-area">
+      <div class="container-fluid">
+
+        <!-- Navbar -->
+        <nav class="navbar navbar-light" style="display: flex; justify-content: space-between; align-items: center;">
+          <!-- Logo -->
+          <a class="navbar" href="landing_page_josie.html">
+            <img src="logo.png" alt="INSERT LOGO HERE" style="max-height: 50px; max-width: 200px; height: auto;" />
+          </a>
+          <!-- Links -->
+          <div style="display: flex; gap: 15px;">
+            <a href="company_info_page_josie_v2.html" class="navbar">
+                Company Info
+            </a>
+            <a href="#" class="navbar">
+                Disruptions
+            </a>
+          </div>
+        </nav>
+
+        <!-- Page Title -->
+        <h3 style="margin-top: 30px;">Welcome to the CompanyLink ERP</h3>
+
+        <!-- Feature Section -->
+        <div class="feature-section">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="feature-card box shadow">
+                <i class="fa fa-search"></i>
+                <h4>Search a Company</h4>
+                <p>Access detailed company information, financial health metrics, and supply chain dependencies.</p>
+                <a href="company_info_page_josie_v2.html" class="btn btn-primary">Go to Company Search</a>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="feature-card box shadow">
+                <i class="fa fa-exclamation-triangle"></i>
+                <h4>Search Disruptions</h4>
+                <p>Monitor and analyze supply chain disruptions, incidents, and their impact on operations.</p>
+                <a href="#" class="btn btn-primary">Go to Disruption Search</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+</body>
+</html>
