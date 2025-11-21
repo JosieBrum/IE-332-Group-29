@@ -1,3 +1,4 @@
+-- HDR Company Filter
 SELECT 
     c.CompanyName,  
     (COUNT(CASE WHEN ic.ImpactLevel = 'High' THEN 1 END) * 100 / NULLIF (COUNT(ic.EventID), 0))  
