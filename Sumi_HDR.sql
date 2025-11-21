@@ -8,7 +8,7 @@ JOIN DisruptionEvent de
 JOIN Company c 
     ON ic.AffectedCompanyID = c.CompanyID
 WHERE
-    (c.CompanyName = 'Smith Inc')
+    c.CompanyName = 'Smith Inc'
     AND (de.EventDate BETWEEN '2021-06-12' AND '2021-06-21')   
 GROUP BY 
     c.CompanyName
