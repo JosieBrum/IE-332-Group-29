@@ -27,3 +27,17 @@ ORDER BY
 	dc.CategoryID ASC
 
 -- List of Events
+SELECT
+    ic.EventID,
+    de.EventDate,
+    dc.CategoryName,
+    ic.ImpactLevel
+FROM ImpactsCompany ic
+JOIN DisruptionEvent de ON ic.EventID = de.EventID
+JOIN DisruptionCategory dc ON de.CategoryID = dc.CategoryID
+JOIN Company c ON ic.AffectedCompanyID = c.CompanyID
+WHERE 
+    c.CompanyName = 'Smith Inc'
+    AND de.EventDate BETWEEN '2021-01-01' AND '2021-12-31'
+ORDER BY 
+    de.EventDate ASC
