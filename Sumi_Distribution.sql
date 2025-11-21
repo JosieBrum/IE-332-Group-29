@@ -25,3 +25,5 @@ GROUP BY
 ORDER BY 
 	Percent DESC,
 	dc.CategoryID ASC
+
+-- List of Events
