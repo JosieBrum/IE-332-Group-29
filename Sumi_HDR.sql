@@ -14,7 +14,7 @@ JOIN Location l
 WHERE
     de.EventDate BETWEEN '2019-01-01' AND '2025-12-31' 
     AND ('Smith Inc' = '' OR c.CompanyName = 'Smith Inc')
-    AND ('1' = '' OR c.TierLevel = '1')
+    AND ('' = '' OR c.TierLevel = '')
     AND ('' = '' OR l.CountryName = '')
     AND ('' = '' OR l.ContinentName = '')    
 GROUP BY
