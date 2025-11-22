@@ -18,7 +18,7 @@ WHERE
     AND ('' = '' OR l.CountryName = '')
     AND ('' = '' OR l.ContinentName = '')    
 GROUP BY
+    c.CompanyName, 
     l.ContinentName, 
     l.CountryName, 
-    c.CompanyName, 
     c.TierLevel
