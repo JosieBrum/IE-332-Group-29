@@ -28,10 +28,8 @@ ORDER BY
 
 -- List of Events
 SELECT
-    ic.EventID,
     de.EventDate,
-    dc.CategoryName,
-    ic.ImpactLevel
+    dc.CategoryName
 FROM ImpactsCompany ic
 JOIN DisruptionEvent de ON ic.EventID = de.EventID
 JOIN DisruptionCategory dc ON de.CategoryID = dc.CategoryID
