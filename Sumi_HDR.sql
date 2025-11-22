@@ -10,7 +10,7 @@ JOIN Company c
     ON ic.AffectedCompanyID = c.CompanyID
 WHERE
     c.CompanyName = 'Smith Inc'
-    AND (de.EventDate BETWEEN '2021-06-12' AND '2021-06-21')   
+    AND (de.EventDate BETWEEN '2019-01-01' AND '2025-12-31')   
 GROUP BY 
     c.CompanyName
 
@@ -29,7 +29,7 @@ JOIN Company c
 JOIN Location l 
     ON c.LocationID = l.LocationID
 WHERE
-    de.EventDate BETWEEN '2021-06-12' AND '2021-06-21' 
+    de.EventDate BETWEEN '2019-01-01' AND '2025-12-31' 
     AND ('1' = '' OR c.TierLevel = '1')
     AND ('' = '' OR l.CountryName = '')
     AND ('' = '' OR l.ContinentName = '')
