@@ -1,20 +1,3 @@
--- HDR Company Filter
-SELECT 
-    c.CompanyName,  
-    (COUNT(CASE WHEN ic.ImpactLevel = 'High' THEN 1 END) * 100 / NULLIF (COUNT(ic.EventID), 0))  
-    AS HDR 
-FROM ImpactsCompany ic 
-JOIN DisruptionEvent de 
-    ON ic.EventID = de.EventID 
-JOIN Company c 
-    ON ic.AffectedCompanyID = c.CompanyID
-WHERE
-    c.CompanyName = 'Smith Inc'
-    AND (de.EventDate BETWEEN '2019-01-01' AND '2025-12-31')   
-GROUP BY 
-    c.CompanyName
-
--- HDR Tier and Region Filter
 SELECT
     c.CompanyName, 
     l.ContinentName, 
@@ -30,9 +13,10 @@ JOIN Location l
     ON c.LocationID = l.LocationID
 WHERE
     de.EventDate BETWEEN '2019-01-01' AND '2025-12-31' 
+    AND ('Smith Inc' = '' OR c.CompanyName = 'Smith Inc')
     AND ('1' = '' OR c.TierLevel = '1')
     AND ('' = '' OR l.CountryName = '')
-    AND ('' = '' OR l.ContinentName = '')
+    AND ('' = '' OR l.ContinentName = '')    
 GROUP BY
     c.CompanyName, 
     l.ContinentName, 
