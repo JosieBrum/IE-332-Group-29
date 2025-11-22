@@ -33,3 +33,8 @@ WHERE
     AND ('1' = '' OR c.TierLevel = '1')
     AND ('' = '' OR l.CountryName = '')
     AND ('' = '' OR l.ContinentName = '')
+GROUP BY
+    c.CompanyName, 
+    l.ContinentName, 
+    l.CountryName, 
+    c.TierLevel
