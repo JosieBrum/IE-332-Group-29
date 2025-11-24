@@ -1,4 +1,3 @@
-
 -- Percent Contribution of Each Company Towards HDR
 SELECT
     c.CompanyName, 
