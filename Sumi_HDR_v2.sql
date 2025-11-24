@@ -33,7 +33,7 @@ GROUP BY
     l.ContinentName, 
     l.CountryName, 
     c.TierLevel
-ORDER BY Percent DESC
+ORDER BY Percent DESC;
 
 -- Overall HDR Calculation (one value)
 SELECT
