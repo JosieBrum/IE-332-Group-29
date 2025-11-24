@@ -1,6 +1,5 @@
 -- Distribution of Disruption Events
 SELECT
-    dc.CategoryID,
     dc.CategoryName,
     COUNT(*) * 100.0 / total.TotalEvents AS Percent
 FROM ImpactsCompany ic
