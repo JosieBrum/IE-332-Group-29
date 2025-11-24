@@ -12,10 +12,10 @@ SELECT
             JOIN Location l ON c.LocationID = l.LocationID
             WHERE de.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
               AND ic.ImpactLevel = 'High'
-              AND ('1' = '' OR c.TierLevel = '1')
-              AND ('' = '' OR l.CountryName = '')
-              AND ('' = '' OR l.ContinentName = '')
               AND ('' = '' OR c.CompanyName = '')
+              AND ('' = '' OR c.TierLevel = '')
+              AND ('' = '' OR l.CountryName = '')
+              AND ('' = '' OR l.ContinentName = '')         
         ), 0)
     ) AS Percent
 FROM ImpactsCompany ic
@@ -25,7 +25,7 @@ JOIN Location l ON c.LocationID = l.LocationID
 WHERE
     de.EventDate BETWEEN '2019-01-01' AND '2025-12-31' 
     AND ('' = '' OR c.CompanyName = '')
-    AND ('1' = '' OR c.TierLevel = '1')
+    AND ('' = '' OR c.TierLevel = '')
     AND ('' = '' OR l.CountryName = '')
     AND ('' = '' OR l.ContinentName = '')
 GROUP BY
@@ -45,5 +45,6 @@ JOIN Location l ON c.LocationID = l.LocationID
 WHERE
     de.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
     AND ('' = '' OR c.CompanyName = '')
-    AND ('1' = '' OR c.TierLevel = '1')
+    AND ('' = '' OR c.TierLevel = '')
     AND ('' = '' OR l.CountryName = '')
+    AND ('' = '' OR l.ContinentName = '')
