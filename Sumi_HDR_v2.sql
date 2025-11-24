@@ -1,3 +1,4 @@
+
 -- Percent Contribution of Each Company Towards HDR
 SELECT
     c.CompanyName, 
@@ -15,7 +16,9 @@ SELECT
               AND ('1' = '' OR c.TierLevel = '1')
               AND ('' = '' OR l.CountryName = '')
               AND ('' = '' OR l.ContinentName = '')
-              AND ('' = '' OR c.CompanyName = '')), 0) AS Percent
+              AND ('' = '' OR c.CompanyName = '')
+        ), 0)
+    ) AS Percent
 FROM ImpactsCompany ic
 JOIN DisruptionEvent de ON ic.EventID = de.EventID
 JOIN Company c ON ic.AffectedCompanyID = c.CompanyID
@@ -45,4 +48,3 @@ WHERE
     AND ('' = '' OR c.CompanyName = '')
     AND ('1' = '' OR c.TierLevel = '1')
     AND ('' = '' OR l.CountryName = '')
-    AND ('' = '' OR l.ContinentName = '');
