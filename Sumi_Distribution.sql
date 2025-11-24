@@ -23,7 +23,7 @@ GROUP BY
     total.TotalEvents
 ORDER BY 
 	Percent DESC,
-	dc.CategoryID ASC
+	dc.CategoryID ASC;
 
 -- List of Events
 SELECT
