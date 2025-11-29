@@ -1,0 +1,74 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+
+  <nav>
+    <ul>
+      <li><strong>Company Info</strong></li>
+    </ul>
+  </nav>
+
+</head>
+
+<body>
+
+  <!-- This Defines the Form and the onsubmit calls the Javascript showCustomer() function defined below -->
+  <!--form action="" onsubmit="showCustomer()">
+    <input type="text" name="table" id="table" placeholder="Table">
+    <input type="text" name="xv" id="xv" placeholder="X-Variable">
+    <input type="text" name="yv" id="yv" placeholder="Y-Variable">
+    <input type="submit">
+  </form> -->
+
+    <form action= "" onsubmit="showCustomer()">
+        <input type="text" name="company" id="company" placeholder = "Enter company">
+        <input type="text" name="tier" id="tier" placeholder = "Enter tier">
+        <input type="text" name="country" id="country" placeholder = "Enter country">
+        <input type="text" name="cotinent" id="continent" placeholder = "Enter continent">
+        <input type="date" name="date1" id="date1" placeholder = "Enter starting date">
+        <input type= "date" name ="date2"id="date2" placeholder = "Enter ending date">
+        <input type= "submit" name = "submit-btn" value="Search">
+    </form>
+
+  <!-- This Div with id=tester is used to act as a placeholder for the plot. -->
+  <div id="tester" style="width:600px;height:250px;"></div>
+
+  <script>
+    function showCustomer() {
+      //https://code-boxx.com/javascript-fetch-get-query-params/
+      var feilds = ["company", "tier", "country", "continent", "date1", "date2"];
+      var inputs = {};
+      for (var key = 0; key < feilds.length; key++) {
+        if (document.getElementById(feilds[key])) {
+          if (document.getElementById(feilds[key]).value != "") {
+            inputs[feilds[key]] = document.getElementById(feilds[key]).value;
+          }
+        }
+      }
+      console.log(inputs);
+      event.preventDefault();
+      var xhttp;
+      xhttp = new XMLHttpRequest();
+      xhttp.onload = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+        }
+      };
+      //https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
+      //https://attacomsian.com/blog/javascript-convert-object-to-query-string-parameters
+      var url = "disruption_events.php?" + new URLSearchParams(inputs).toString();
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+  </script>
+
+  <div id="temp"></div>
+
+</html>

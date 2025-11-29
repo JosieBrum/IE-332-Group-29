@@ -1,0 +1,65 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+
+  <nav>
+    <ul>
+      <li><strong>Login Page</strong></li>
+    </ul>
+  </nav>
+
+</head>
+
+<body>
+
+  <!-- This Defines the Form and the onsubmit calls the Javascript showCustomer() function defined below -->
+  <!--form action="" onsubmit="showCustomer()">
+    <input type="text" name="table" id="table" placeholder="Table">
+    <input type="text" name="xv" id="xv" placeholder="X-Variable">
+    <input type="text" name="yv" id="yv" placeholder="Y-Variable">
+    <input type="submit">
+  </form> -->
+
+    <form action= "" onsubmit="showCustomer()">
+        <input type="text" name="username" id="username" placeholder = "Enter username">
+        <input type= "text" name ="password"id="password" placeholder = "Enter password">
+        <input type= "submit" name = "submit-btn" value="Search">
+    </form>
+
+  <!-- This Div with id=tester is used to act as a placeholder for the plot. -->
+  <div id="tester" style="width:600px;height:250px;"></div>
+
+  <script>
+    function showCustomer() {
+      xt = document.getElementById("username").value;
+      yt = document.getElementById("password").value;
+      str = xt + "|" + yt + "|";
+      console.log(str);
+      event.preventDefault();
+      var xhttp;
+      if (str == "") {
+        document.getElementById("temp").innerHTML = "";
+        return;
+      }
+      xhttp = new XMLHttpRequest();
+      xhttp.onload = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+        }
+      };
+      var url = "login_page_check.php?l=" + encodeURIComponent(str);
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+  </script>
+
+  <div id="temp"></div>
+
+</html>
