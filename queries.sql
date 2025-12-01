@@ -37,6 +37,20 @@ GROUP BY
     c.CompanyName
 ORDER BY 
     month;
+"Modified 1" 
+SELECT 
+    c.CompanyName,
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+WHERE 
+    c.CompanyName = '".$companyName."'
+    AND e.EventDate BETWEEN '".$startDate."' AND '".$endDate."'
+
 
 "Query 2 Filteration by Tier Level"
 SELECT 
@@ -56,6 +70,19 @@ GROUP BY
     c.TierLevel
 ORDER BY 
     month;
+""
+SELECT 
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+WHERE 
+    c.TierLevel = ?
+    AND e.EventDate BETWEEN ? AND ?;
+
 
 "Query 3 Filteration by Country"
 SELECT 
@@ -76,6 +103,21 @@ GROUP BY
     l.CountryName
 ORDER BY 
     month;
+""
+SELECT 
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+    JOIN Location AS l
+        ON c.LocationID = l.LocationID
+WHERE 
+    l.CountryName = ?
+    AND e.EventDate BETWEEN ? AND ?;
+
 "Query 4 Filteration by Continent"
 SELECT 
     DATE_FORMAT(e.EventDate, '%Y-%m') AS month,
@@ -95,6 +137,21 @@ GROUP BY
     l.ContinentName
 ORDER BY 
     month;
+
+""
+SELECT 
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+    JOIN Location AS l
+        ON c.LocationID = l.LocationID
+WHERE 
+    l.ContinentName = ?
+    AND e.EventDate BETWEEN ? AND ?;
 
 "Query 5 Filteration by Tier and Country"
 SELECT 
@@ -118,6 +175,21 @@ GROUP BY
     l.CountryName
 ORDER BY 
     month;
+""
+SELECT 
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+    JOIN Location AS l 
+        ON c.LocationID = l.LocationID
+WHERE 
+    c.TierLevel = ?
+    AND l.CountryName = ?
+    AND e.EventDate BETWEEN ? AND ?;
 
 "Query 6 Filteration by Tier and Continent"
 SELECT 
@@ -141,6 +213,23 @@ GROUP BY
     l.ContinentName
 ORDER BY 
     month;
+
+"" 
+SELECT 
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+    JOIN Location AS l 
+        ON c.LocationID = l.LocationID
+WHERE 
+    c.TierLevel = ?
+    AND l.ContinentName = ?
+    AND e.EventDate BETWEEN ? AND ?;
+
 
 "All Queries are to be filtered by 2 or more factors, a variable filteration + date"
 
