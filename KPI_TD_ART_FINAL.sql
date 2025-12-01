@@ -32,5 +32,20 @@ WHERE e.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
   AND ('' = '' OR l.CountryName   = '')
   AND ('' = '' OR l.ContinentName = '')
   AND ('' = '' OR c.TierLevel    = '')
-
+"ART"
+SELECT 
+    AVG(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS average_recovery_time_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+    LEFT JOIN Location AS l 
+        ON c.LocationID = l.LocationID
+WHERE e.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
+  AND ('' = '' OR c.CompanyName   = '')
+  AND ('' = '' OR l.CountryName   = '')
+  AND ('' = '' OR l.ContinentName = '')
+  AND ('' = '' OR c.TierLevel    = '')
 
