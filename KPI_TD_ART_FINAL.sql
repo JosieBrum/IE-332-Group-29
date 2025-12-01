@@ -15,4 +15,21 @@ WHERE
     c.CompanyName = '".$companyName."'
     AND s.ActualDate BETWEEN '".$startDate."' AND '".$endDate."'
 
+"TD Query"
+SELECT 
+    SUM(DATEDIFF(e.EventRecoveryDate, e.EventDate)) AS total_downtime_days
+FROM 
+    DisruptionEvent AS e
+    JOIN ImpactsCompany AS ic 
+        ON e.EventID = ic.EventID
+    JOIN Company AS c 
+        ON ic.AffectedCompanyID = c.CompanyID
+    LEFT JOIN Location AS l 
+        ON c.LocationID = l.LocationID
+WHERE 
+    e.EventDate BETWEEN ? AND ?
+    AND (? IS NULL OR c.CompanyName = ?)
+    AND (? IS NULL OR c.TierLevel = ?)
+    AND (? IS NULL OR l.CountryName = ?)
+    AND (? IS NULL OR l.ContinentName = ?);
 
