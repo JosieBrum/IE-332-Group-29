@@ -26,10 +26,11 @@ FROM
         ON ic.AffectedCompanyID = c.CompanyID
     LEFT JOIN Location AS l 
         ON c.LocationID = l.LocationID
-WHERE 
-    e.EventDate BETWEEN ? AND ?
-    AND (? IS NULL OR c.CompanyName = ?)
-    AND (? IS NULL OR c.TierLevel = ?)
-    AND (? IS NULL OR l.CountryName = ?)
-    AND (? IS NULL OR l.ContinentName = ?);
+
+WHERE e.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
+  AND ('' = '' OR c.CompanyName   = '')
+  AND ('' = '' OR l.CountryName   = '')
+  AND ('' = '' OR l.ContinentName = '')
+  AND ('' = '' OR c.TierLevel    = '')
+
 
