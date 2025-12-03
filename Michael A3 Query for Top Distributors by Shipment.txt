@@ -1,0 +1,18 @@
+
+
+SELECT 
+    d.CompanyID,
+    c.CompanyName,
+    c.TierLevel,
+    c.Type,
+    l.CountryName,
+    l.City,
+    SUM(s.Quantity) AS TotalShipmentVolume,
+    COUNT(s.ShipmentID) AS TotalShipments
+FROM Distributor d
+JOIN Company c ON d.CompanyID = c.CompanyID
+JOIN Location l ON c.LocationID = l.LocationID
+LEFT JOIN Shipping s ON s.DistributorID = d.CompanyID
+WHERE c.CompanyName = 'Haynes-Long'  
+GROUP BY d.CompanyID, c.CompanyName, c.TierLevel, c.Type, l.CountryName, l.City;
+
