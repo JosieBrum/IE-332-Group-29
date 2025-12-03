@@ -1,0 +1,25 @@
+
+Option 2:
+SELECT 
+    c.CompanyID,
+    c.CompanyName,
+
+    COUNT(DISTINCT d.DownstreamCompanyID) AS DownstreamCount,
+
+    COUNT(ic.EventID) AS HighImpactCount,
+
+    (COUNT(DISTINCT d.DownstreamCompanyID) * COUNT(ic.EventID)) AS CriticalityScore
+
+FROM Company c
+LEFT JOIN DependsOn d
+    ON c.CompanyID = d.UpstreamCompanyID
+
+-- Only join HIGH impact events
+LEFT JOIN ImpactsCompany ic
+    ON c.CompanyID = ic.AffectedCompanyID
+    AND ic.ImpactLevel = 'High'
+
+GROUP BY c.CompanyID, c.CompanyName
+ORDER BY CriticalityScore DESC;
+
+
