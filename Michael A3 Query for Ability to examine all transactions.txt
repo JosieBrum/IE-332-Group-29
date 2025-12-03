@@ -1,0 +1,89 @@
+SELECT *
+FROM (
+
+    SELECT
+        t.TransactionID,
+        'Shipping' AS TransactionType,
+        s.ActualDate AS TransactionDate,
+        p.ProductName,
+        src.CompanyName AS SourceCompany,
+        dst.CompanyName AS DestinationCompany,
+        s.Quantity,
+        lsrc.City AS SourceCity,
+        lsrc.CountryName AS SourceCountry,
+        ldst.City AS DestinationCity,
+        ldst.CountryName AS DestinationCountry
+    FROM Shipping s
+    JOIN InventoryTransaction t ON t.TransactionID = s.TransactionID
+    JOIN Product p ON p.ProductID = s.ProductID
+    JOIN Company src ON src.CompanyID = s.SourceCompanyID
+    JOIN Company dst ON dst.CompanyID = s.DestinationCompanyID
+    JOIN Location lsrc ON lsrc.LocationID = src.LocationID
+    JOIN Location ldst ON ldst.LocationID = dst.LocationID
+    WHERE t.Type = 'Shipping'
+      AND s.ActualDate BETWEEN '2019-01-01' AND '2025-12-31'
+      AND ('Haynes-Long' IS NULL 
+           OR src.CompanyName = 'Haynes-Long'
+           OR dst.CompanyName = 'Haynes-Long')
+      AND (NULL IS NULL
+           OR lsrc.City = NULL
+           OR lsrc.CountryName = NULL
+           OR lsrc.ContinentName = NULL
+           OR ldst.City = NULL
+           OR ldst.CountryName = NULL
+           OR ldst.ContinentName = NULL)
+
+    UNION ALL
+
+    SELECT
+        t.TransactionID,
+        'Receiving' AS TransactionType,
+        r.ReceivedDate AS TransactionDate,
+        p.ProductName,
+        src.CompanyName AS SourceCompany,
+        rc.CompanyName AS DestinationCompany,
+        r.QuantityReceived AS Quantity,
+        lsrc.City AS SourceCity,
+        lsrc.CountryName AS SourceCountry,
+        lrc.City AS DestinationCity,
+        lrc.CountryName AS DestinationCountry
+    FROM Receiving r
+    JOIN InventoryTransaction t ON t.TransactionID = r.TransactionID
+    JOIN Shipping s ON s.ShipmentID = r.ShipmentID
+    JOIN Product p ON p.ProductID = s.ProductID
+    JOIN Company src ON src.CompanyID = s.SourceCompanyID
+    JOIN Company rc ON rc.CompanyID = r.ReceiverCompanyID
+    JOIN Location lsrc ON lsrc.LocationID = src.LocationID
+    JOIN Location lrc ON lrc.LocationID = rc.LocationID
+    WHERE t.Type = 'Receiving'
+      AND r.ReceivedDate BETWEEN '2019-01-01' AND '2025-12-31'
+      AND ('Haynes-Long' IS NULL 
+           OR rc.CompanyName = 'Haynes-Long'
+           OR src.CompanyName = 'Haynes-Long')
+
+    UNION ALL
+
+    SELECT
+        t.TransactionID,
+        'Adjustment' AS TransactionType,
+        a.AdjustmentDate AS TransactionDate,
+        p.ProductName,
+        c.CompanyName AS SourceCompany,
+        c.CompanyName AS DestinationCompany,
+        a.QuantityChange AS Quantity,
+        l.City AS SourceCity,
+        l.CountryName AS SourceCountry,
+        l.City AS DestinationCity,
+        l.CountryName AS DestinationCountry
+    FROM InventoryAdjustment a
+    JOIN InventoryTransaction t ON t.TransactionID = a.TransactionID
+    JOIN Product p ON p.ProductID = a.ProductID
+    JOIN Company c ON c.CompanyID = a.CompanyID
+    JOIN Location l ON l.LocationID = c.LocationID
+    WHERE t.Type = 'Adjustment'
+      AND a.AdjustmentDate BETWEEN '2019-01-01' AND '2025-12-31'
+      AND ('Haynes-Long' IS NULL 
+           OR c.CompanyName = 'Haynes-Long')
+
+) AS Combined
+ORDER BY TransactionDate, TransactionID;
