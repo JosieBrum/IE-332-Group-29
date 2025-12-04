@@ -1,0 +1,32 @@
+SELECT
+    s.ShipmentID,
+    s.TransactionID,
+    s.ActualDate,
+    p.ProductName,
+    c.CompanyName AS DistributorName,
+    src.CompanyName AS SourceCompany,
+    dst.CompanyName AS DestinationCompany,
+    lsrc.City AS SourceCity,
+    lsrc.CountryName AS SourceCountry,
+    lsrc.ContinentName AS SourceContinent,
+    ldst.City AS DestinationCity,
+    ldst.CountryName AS DestinationCountry,
+    ldst.ContinentName AS DestinationContinent,
+    s.Quantity AS ShipmentVolume
+FROM Shipping s
+JOIN InventoryTransaction t ON t.TransactionID = s.TransactionID
+JOIN Product p ON p.ProductID = s.ProductID
+JOIN Distributor d ON d.CompanyID = s.DistributorID
+JOIN Company c ON c.CompanyID = d.CompanyID
+JOIN Company src ON src.CompanyID = s.SourceCompanyID
+JOIN Company dst ON dst.CompanyID = s.DestinationCompanyID
+JOIN Location lsrc ON lsrc.LocationID = src.LocationID
+JOIN Location ldst ON ldst.LocationID = dst.LocationID
+WHERE t.Type = 'Shipping'
+  AND s.ActualDate BETWEEN '2019-01-01' AND '2025-12-31'
+  AND (
+        src.CompanyName = 'Small PLC'
+        OR dst.CompanyName = 'Small PLC'
+        OR c.CompanyName  = 'Small PLC'
+      )
+ORDER BY s.ActualDate, s.TransactionID;
