@@ -11,7 +11,7 @@ JOIN Company AS c
     ON ic.AffectedCompanyID = c.CompanyID
 JOIN Location AS l
     ON c.LocationID = l.LocationID
-WHERE e.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
+WHERE e.EventDate <= '2025-12-31' and e.EventRecoveryDate >= '2024-01-01'
 
 -- Filters
 
@@ -20,4 +20,5 @@ WHERE e.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
   AND ('' = '' OR l.ContinentName = '')
   AND ('' = '' OR c.TierLevel    = '')
 GROUP BY c.CompanyID, c.CompanyName
+
 ORDER BY c.CompanyName;
