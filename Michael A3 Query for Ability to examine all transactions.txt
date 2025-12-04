@@ -1,6 +1,5 @@
 SELECT *
 FROM (
-
     SELECT
         t.TransactionID,
         'Shipping' AS TransactionType,
@@ -11,8 +10,10 @@ FROM (
         s.Quantity,
         lsrc.City AS SourceCity,
         lsrc.CountryName AS SourceCountry,
+        lsrc.ContinentName AS SourceContinent,
         ldst.City AS DestinationCity,
-        ldst.CountryName AS DestinationCountry
+        ldst.CountryName AS DestinationCountry,
+        ldst.ContinentName AS DestinationContinent
     FROM Shipping s
     JOIN InventoryTransaction t ON t.TransactionID = s.TransactionID
     JOIN Product p ON p.ProductID = s.ProductID
@@ -22,16 +23,18 @@ FROM (
     JOIN Location ldst ON ldst.LocationID = dst.LocationID
     WHERE t.Type = 'Shipping'
       AND s.ActualDate BETWEEN '2019-01-01' AND '2025-12-31'
-      AND ('Haynes-Long' IS NULL 
+      AND ('Haynes-Long' IS NULL
            OR src.CompanyName = 'Haynes-Long'
            OR dst.CompanyName = 'Haynes-Long')
-      AND (NULL IS NULL
-           OR lsrc.City = NULL
-           OR lsrc.CountryName = NULL
-           OR lsrc.ContinentName = NULL
-           OR ldst.City = NULL
-           OR ldst.CountryName = NULL
-           OR ldst.ContinentName = NULL)
+      AND ('Manchester' IS NULL
+           OR lsrc.City = 'Manchester'
+           OR ldst.City = 'Manchester')
+      AND ('United Kingdom' IS NULL
+           OR lsrc.CountryName = 'United Kingdom'
+           OR ldst.CountryName = 'United Kingdom')
+      AND ('Europe' IS NULL
+           OR lsrc.ContinentName = 'Europe'
+           OR ldst.ContinentName = 'Europe')
 
     UNION ALL
 
@@ -45,8 +48,10 @@ FROM (
         r.QuantityReceived AS Quantity,
         lsrc.City AS SourceCity,
         lsrc.CountryName AS SourceCountry,
+        lsrc.ContinentName AS SourceContinent,
         lrc.City AS DestinationCity,
-        lrc.CountryName AS DestinationCountry
+        lrc.CountryName AS DestinationCountry,
+        lrc.ContinentName AS DestinationContinent
     FROM Receiving r
     JOIN InventoryTransaction t ON t.TransactionID = r.TransactionID
     JOIN Shipping s ON s.ShipmentID = r.ShipmentID
@@ -57,9 +62,18 @@ FROM (
     JOIN Location lrc ON lrc.LocationID = rc.LocationID
     WHERE t.Type = 'Receiving'
       AND r.ReceivedDate BETWEEN '2019-01-01' AND '2025-12-31'
-      AND ('Haynes-Long' IS NULL 
-           OR rc.CompanyName = 'Haynes-Long'
-           OR src.CompanyName = 'Haynes-Long')
+      AND ('Haynes-Long' IS NULL
+           OR src.CompanyName = 'Haynes-Long'
+           OR rc.CompanyName = 'Haynes-Long')
+      AND ('Manchester' IS NULL
+           OR lsrc.City = 'Manchester'
+           OR lrc.City = 'Manchester')
+      AND ('United Kingdom' IS NULL
+           OR lsrc.CountryName = 'United Kingdom'
+           OR lrc.CountryName = 'United Kingdom')
+      AND ('Europe' IS NULL
+           OR lsrc.ContinentName = 'Europe'
+           OR lrc.ContinentName = 'Europe')
 
     UNION ALL
 
@@ -73,8 +87,10 @@ FROM (
         a.QuantityChange AS Quantity,
         l.City AS SourceCity,
         l.CountryName AS SourceCountry,
+        l.ContinentName AS SourceContinent,
         l.City AS DestinationCity,
-        l.CountryName AS DestinationCountry
+        l.CountryName AS DestinationCountry,
+        l.ContinentName AS DestinationContinent
     FROM InventoryAdjustment a
     JOIN InventoryTransaction t ON t.TransactionID = a.TransactionID
     JOIN Product p ON p.ProductID = a.ProductID
@@ -82,8 +98,14 @@ FROM (
     JOIN Location l ON l.LocationID = c.LocationID
     WHERE t.Type = 'Adjustment'
       AND a.AdjustmentDate BETWEEN '2019-01-01' AND '2025-12-31'
-      AND ('Haynes-Long' IS NULL 
+      AND ('Haynes-Long' IS NULL
            OR c.CompanyName = 'Haynes-Long')
+      AND ('Manchester' IS NULL
+           OR l.City = 'Manchester')
+      AND ('United Kingdom' IS NULL
+           OR l.CountryName = 'United Kingdom')
+      AND ('Europe' IS NULL
+           OR l.ContinentName = 'Europe')
 
 ) AS Combined
 ORDER BY TransactionDate, TransactionID;
