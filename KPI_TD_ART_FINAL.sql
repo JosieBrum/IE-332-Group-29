@@ -43,7 +43,7 @@ FROM
         ON ic.AffectedCompanyID = c.CompanyID
     LEFT JOIN Location AS l 
         ON c.LocationID = l.LocationID
-WHERE e.EventDate BETWEEN '2019-01-01' AND '2025-12-31'
+WHERE e.EventDate <= '2025-12-31' and e.EventRecoveryDate >= '2024-01-01'
   AND ('' = '' OR c.CompanyName   = '')
   AND ('' = '' OR l.CountryName   = '')
   AND ('' = '' OR l.ContinentName = '')
