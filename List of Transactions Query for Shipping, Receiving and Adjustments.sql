@@ -5,24 +5,21 @@ SELECT
     s.ActualDate AS TransactionDate,
     p.ProductName,
     src.CompanyName AS SourceCompanyName,
-    dst.CompanyName AS DestinationCompanyName,
     s.Quantity
 FROM InventoryTransaction AS t
 JOIN Shipping AS s
     ON t.TransactionID = s.TransactionID
 JOIN Company AS src
     ON s.SourceCompanyID = src.CompanyID
-JOIN Company AS dst
-    ON s.DestinationCompanyID = dst.CompanyID
 JOIN Product AS p
     ON s.ProductID = p.ProductID
 WHERE t.Type = 'Shipping'
   AND s.ActualDate BETWEEN '2019-01-01' AND '2025-12-31'
   AND src.CompanyName = 'Haynes-Long'
-       OR dst.CompanyName = 'Haynes-Long'
 ORDER BY s.ActualDate, t.TransactionID;
 
--- Haynes-Long is either the shipper or the receiver in the shipment
+
+
 
 -- RECEIVING transactions involving Haynes-Long between 2019-01-01 and 2025-12-31
 SELECT
@@ -30,7 +27,6 @@ SELECT
     'Receiving' AS TransactionType,
     r.ReceivedDate AS TransactionDate,
     p.ProductName,
-    src.CompanyName AS SourceCompanyName,
     rc.CompanyName AS DestinationCompanyName,
     r.QuantityReceived AS Quantity
 FROM InventoryTransaction AS t
@@ -49,7 +45,9 @@ WHERE t.Type = 'Receiving'
   AND rc.CompanyName = 'Haynes-Long'
 ORDER BY r.ReceivedDate, t.TransactionID;
 
--- Haynes-Long is the receiver (and possibly also the shipper)
+
+
+
 
 -- ADJUSTMENT transactions for Haynes-Long between 2019-01-01 and 2025-12-31
 SELECT 
@@ -71,4 +69,6 @@ WHERE t.Type = 'Adjustment'
   AND a.AdjustmentDate BETWEEN '2019-01-01' AND '2025-12-31'
   AND c.CompanyName = 'Haynes-Long'
 ORDER BY a.AdjustmentDate, t.TransactionID;
+
+
 
