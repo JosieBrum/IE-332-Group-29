@@ -10,7 +10,7 @@ SELECT
     ) AS on_time_delivery_rate_percent
 FROM 
     Shipping AS s
-    JOIN Company AS c ON s.SourceCompanyID = c.CompanyID
+    JOIN Company AS c ON s.DistributorID = c.CompanyID
 WHERE 
     c.CompanyName = '".$companyName."'
     AND s.ActualDate BETWEEN '".$startDate."' AND '".$endDate."'
