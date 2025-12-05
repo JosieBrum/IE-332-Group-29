@@ -13,7 +13,7 @@ FROM
     JOIN Company AS c ON s.SourceCompanyID = c.CompanyID
 WHERE 
     c.CompanyName = '".$companyName."'
-    AND e.EventDate <= '01-01-2024' and e.EventRecoveryDate >= '12-31-2025'
+    AND s.ActualDate BETWEEN '".$startDate."' AND '".$endDate."'
 
 "TD Query"
 SELECT 
