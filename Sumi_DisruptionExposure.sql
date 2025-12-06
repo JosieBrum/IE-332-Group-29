@@ -1,7 +1,7 @@
 -- Disruption Exposoure
 SELECT
     c.CompanyName,
-    COUNT(ic.EventID) AS TotalDisruptions,
+    --COUNT(ic.EventID) AS TotalDisruptions,
     COUNT(CASE WHEN ic.ImpactLevel = 'Low' THEN 1 END) AS LowImpactEvents,
     COUNT(CASE WHEN ic.ImpactLevel = 'Medium' THEN 1 END) AS MediumImpactEvents,
     COUNT(CASE WHEN ic.ImpactLevel = 'High' THEN 1 END) AS HighImpactEvents,
