@@ -1,6 +1,5 @@
 --TD One Value
 SELECT
-    COUNT(*) AS DisruptionCount,
     SUM(de.RecoveryDays) AS TD
 FROM (
     SELECT
@@ -45,7 +44,6 @@ ORDER BY e.EventId ASC;
 
 --ART One Value
 SELECT
-    COUNT(*) AS DisruptionCount,
     AVG(de.RecoveryDays) AS ART
 FROM (
     SELECT
