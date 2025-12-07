@@ -1,0 +1,13 @@
+SELECT c.CompanyName, 
+AVG(fr.HealthScore) AS AverageHealthScore
+FROM Company c
+JOIN FinancialReport fr ON c.CompanyID = fr.CompanyID
+WHERE c.Type = 'Retailer'
+AND (fr.RepYear BETWEEN 2019 AND 2025)
+AND (fr.Quarter BETWEEN 'Q1' AND 'Q4')
+GROUP BY c.CompanyName
+ORDER BY AverageHealthScore DESC;
+
+
+
+
