@@ -1,0 +1,16 @@
+"Withstanding
+SELECT 
+    COUNT(s.ShipmentID) AS OutstandingShipments
+FROM Shipping s
+JOIN Company dist ON s.DistributorID = dist.CompanyID
+WHERE s.ActualDate IS NULL
+  AND dist.CompanyName = ?  
+  AND s.PromisedDate BETWEEN ? AND ?;
+"Delivered"
+SELECT 
+    COUNT(s.ShipmentID) AS DeliveredShipments
+FROM Shipping s
+JOIN Company dist ON s.DistributorID = dist.CompanyID
+WHERE s.ActualDate IS NOT NULL
+  AND dist.CompanyName = ?  -- Replace ? with distributor name or remove this line
+  AND s.PromisedDate BETWEEN ? AND ?; 
