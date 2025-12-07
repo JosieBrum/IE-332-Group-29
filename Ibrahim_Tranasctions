@@ -3,9 +3,9 @@ SELECT
     COUNT(s.ShipmentID) AS OutstandingShipments
 FROM Shipping s
 JOIN Company dist ON s.DistributorID = dist.CompanyID
-WHERE s.PromisedDate BETWEEN '2025-07-11' AND '2025-07-12'   -- Replace ? with start and end dates
-  AND (s.ActualDate IS NULL OR s.ActualDate > '2025-07-12' )  -- Replace ? with end date
-  AND dist.CompanyName = 'Perez-King'
+WHERE s.PromisedDate BETWEEN ? AND ?  -- Replace ? with start and end dates
+  AND (s.ActualDate IS NULL OR s.ActualDate > ?)  -- Replace ? with end date
+  AND dist.CompanyName = ?; 
 "Delivered"
 SELECT 
     COUNT(s.ShipmentID) AS DeliveredShipments
