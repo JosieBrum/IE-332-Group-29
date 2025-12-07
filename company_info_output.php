@@ -257,26 +257,32 @@ WHERE
 
 //shipping table
 $sql14 = "SELECT
+    t.TransactionID,
+    'Shipping' AS TransactionType,
     s.ActualDate AS TransactionDate,
     p.ProductName,
     src.CompanyName AS SourceCompanyName,
+	rrc.CompanyName AS DestinationCompanyName,
     s.Quantity
 FROM InventoryTransaction AS t
 JOIN Shipping AS s
     ON t.TransactionID = s.TransactionID
 JOIN Company AS src
     ON s.SourceCompanyID = src.CompanyID
+JOIN Company AS rrc
+    ON s.DestinationCompanyID = rrc.CompanyID
 JOIN Product AS p
     ON s.ProductID = p.ProductID
 WHERE t.Type = 'Shipping'
   AND s.ActualDate BETWEEN '".$date1_f."' AND '".$date2_f."'
-  AND (src.CompanyName = '".$companyName."')
-ORDER BY s.ActualDate, t.TransactionID;";
+  AND src.CompanyName = '".$companyName."'
+ORDER BY s.ActualDate, t.TransactionID";
 
 //reciving table
 $sql15 = "SELECT
     r.ReceivedDate AS TransactionDate,
     p.ProductName,
+    src.CompanyName As SourceCompanyName,
     rc.CompanyName AS DestinationCompanyName,
     r.QuantityReceived AS Quantity
 FROM InventoryTransaction AS t
@@ -312,7 +318,7 @@ JOIN Product AS p
 WHERE t.Type = 'Adjustment'
   AND a.AdjustmentDate BETWEEN '".$date1_f."' AND '".$date2_f."'
   AND c.CompanyName = '".$companyName."'
-ORDER BY a.AdjustmentDate, t.TransactionID;";
+ORDER BY a.AdjustmentDate, t.TransactionID";
 
 $sql20 = "SELECT 
     AVG(DATEDIFF(s.ActualDate, s.PromisedDate)) AS avg_delay_days,
