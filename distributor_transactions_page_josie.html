@@ -1,0 +1,317 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"> <!-- input form style -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+  <link rel="stylesheet" href="template/apex_charts_material/assets/styles.css?v=3" />  <!-- general css style -->
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="chart-utils.js"></script>
+  
+  <style>
+    /* Remove list style from nav tabs */
+    .nav-tabs {
+      list-style: none;
+      padding-left: 0;
+    }
+    .nav-tabs .nav-item {
+      list-style: none;
+    }
+    /* Add padding at bottom to create buffer */
+    #wrapper {
+      padding-bottom: 50px;
+    }
+  </style>
+
+  <title>Distributor Transactions</title>
+
+</head>
+
+<body>
+
+  <!-- Vertical Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <img src="logo.png" alt="INSERT LOGO HERE" />
+    </div>
+    <ul class="nav-links">
+      <li><a href="company_info_page_josie_v5.html">Company Information</a></li>
+      <li><a href="disruptions_events_josie.html">Disruption Events</a></li>
+      <li><a href="company_transactions_page_josie.html">Company Transactions</a></li>
+      <li><a href="distributor_transactions_page_josie.html" class="active">Distributor Transactions</a></li>
+      <li><a href="login_page_josie.html" style="color: #ff4560;">Log Out</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+     <!-- Page Title --> 
+    <h3>Distributor Transactions</h3>
+
+  <div class="box shadow">
+    <!-- This form is used to get user input for the distributor name and date range -->
+    <form action= "" onsubmit="showCustomer()">
+        <div style="display: grid; grid-template-columns: 3fr 1fr 1fr auto; gap: 10px; align-items: end;">
+          <input type= "text" name= "Company_name" id= "company" placeholder= "Enter a distributor name" >
+          <input type="date" name="date1" id="date1" placeholder = "Enter starting date">
+          <input type= "date" name ="date2"id="date2" placeholder = "Enter ending date">
+          <input type= "submit" name = "submit-btn" value="Search">
+        </div>
+        <div id="errorMessage" class="mt-3" style="color: red; display: none;"></div>
+    </form>
+  </div>
+
+  <script>
+    function showCustomer() {
+      // Clear previous error message
+      const errorMessageDiv = document.getElementById("errorMessage");
+      errorMessageDiv.style.display = "none";
+      errorMessageDiv.textContent = "";
+
+      // This part gets the strings from the table.
+      str = document.getElementById("company").value.trim();
+      xt = document.getElementById("date1").value;
+      yt = document.getElementById("date2").value;
+
+    //https://code-boxx.com/javascript-fetch-get-query-params/
+  var feilds = ["company", "date1", "date2"];
+      var inputs = {};
+      for (var key = 0; key < feilds.length; key++) {
+        if (document.getElementById(feilds[key])) {
+          if (document.getElementById(feilds[key]).value != "") {
+            inputs[feilds[key]] = document.getElementById(feilds[key]).value;
+          }
+        }
+      } 
+
+      // Set default dates if not provided
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+      
+      // If no end date provided, use today
+      if (!yt) {
+        yt = today.toISOString().split('T')[0];
+        document.getElementById("date2").value = yt;
+      }
+      
+      // If no start date provided, use 2019-01-01 (start of database)
+      if (!xt) {
+        const dbStartDate = '2019-01-01';
+        xt = dbStartDate;
+        document.getElementById("date1").value = dbStartDate;
+      }
+      
+      const startDate = new Date(xt);
+      const endDate = new Date(yt);
+
+      // Check if end date is before start date
+      if (endDate < startDate) {
+        errorMessageDiv.textContent = "The ending date cannot be before the starting date.";
+        errorMessageDiv.style.display = "block";
+        event.preventDefault();
+        return;
+      }
+
+      // Check if either date is after today
+      if (startDate > today) {
+        errorMessageDiv.textContent = "The starting date cannot be after today's date.";
+        errorMessageDiv.style.display = "block";
+        event.preventDefault();
+        return;
+      }
+
+      if (endDate > today) {
+        errorMessageDiv.textContent = "The ending date cannot be after today's date.";
+        errorMessageDiv.style.display = "block";
+        event.preventDefault();
+        return;
+      }
+      
+      // Update inputs object with the dates (in case defaults were used)
+      inputs["date1"] = xt;
+      inputs["date2"] = yt;
+
+      // This is how you join the strings into one big one.
+      str = xt + "|" + yt + "|" + str;
+
+      
+      event.preventDefault();
+
+      var xhttp;
+      if (str == "") {
+        document.getElementById("temp").innerHTML = "";
+        return;
+      }
+      xhttp = new XMLHttpRequest();
+
+      xhttp.onload = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+          
+          // Validate company name against distributor list
+          const companyListAll = temp["Company Name List All: "];
+          const enteredCompany = document.getElementById("company").value.trim();
+          
+          if (companyListAll && companyListAll.length > 0 && !companyListAll.includes(enteredCompany)) {
+            const errorMessageDiv = document.getElementById("errorMessage");
+            errorMessageDiv.textContent = "Company '" + enteredCompany + "' is not a distributor or not found in database. Please check the spelling and try again.";
+            errorMessageDiv.style.display = "block";
+            document.getElementById("temp").innerHTML = "";
+            return;
+          }
+          
+          // Build HTML with tabs
+          const companyName = enteredCompany; // Use the entered company name
+          
+          let html = `<h3></br>${companyName}</h3>`;
+          
+          // Tab navigation
+          html += `<ul class="nav nav-tabs mt-3" id="distributorTabs" role="tablist">`;
+          html += `  <li class="nav-item">`;
+          html += `    <a class="nav-link active" id="overview-tab" data-toggle="tab" href="#overview" role="tab">Overview</a>`;
+          html += `  </li>`;
+          html += `  <li class="nav-item">`;
+          html += `    <a class="nav-link" id="disruptions-tab" data-toggle="tab" href="#disruptions" role="tab">Disruptions</a>`;
+          html += `  </li>`;
+          html += `  <li class="nav-item">`;
+          html += `    <a class="nav-link" id="shipment-status-tab" data-toggle="tab" href="#shipment-status" role="tab">Shipments</a>`;
+          html += `  </li>`;
+          html += `  <li class="nav-item">`;
+            html += `    <a class="nav-link" id="products-tab" data-toggle="tab" href="#products" role="tab">Products Handled</a>`;
+            html += `  </li>`;
+          html += `</ul>`;
+          
+          // Helper function for table display
+          function makeTableHTML(myArray) {
+            if (!myArray || myArray.length === 0) {
+              return "None";
+            }
+            var result = "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px;'>";
+            for(var i=0; i<myArray.length; i++) {
+                result += "<div>"+myArray[i]+"</div>";
+            }
+            result += "</div>";
+            return result;
+          }
+          
+          // Tab content
+          html += `<div class="tab-content mt-3" id="distributorTabsContent">`;
+          
+          // Overview Tab
+          html += `  <div class="tab-pane fade show active" id="overview" role="tabpanel">`;
+          html += `    <div class="row sparkboxes mt-4">`;
+          const ontimeDelivery = temp["on time delivery rate percent:"] && temp["on time delivery rate percent:"][0] ? temp["on time delivery rate percent:"][0] : "None";
+          html += `      <div class="col-md-3"><div class="box box1 shadow"><h6>On-Time Delivery Percent</h6>${ontimeDelivery}${ontimeDelivery !== "None" ? "%" : ""}</div></div>`;
+          const disruptionExposure = temp["DisruptionExposure:"] && temp["DisruptionExposure:"][0] ? temp["DisruptionExposure:"][0] : "None";
+          html += `      <div class="col-md-3"><div class="box box2 shadow"><h6>Disruption Exposure</h6>${disruptionExposure}</div></div>`;
+          const outstandingShipments = temp["Outstanding Shipments:"] && temp["Outstanding Shipments:"][0] ? temp["Outstanding Shipments:"][0] : "None";
+          html += `      <div class="col-md-3"><div class="box box6 shadow"><h6>Outstanding Shipments</h6>${outstandingShipments}</div></div>`;
+          const deliveredShipments = temp["Delievered Shipments:"] && temp["Delievered Shipments:"][0] ? temp["Delievered Shipments:"][0] : "None";
+          html += `      <div class="col-md-3"><div class="box box7 shadow"><h6>Delivered Shipments</h6>${deliveredShipments}</div></div>`;
+          html += `    </div>`;
+          html += `    <h5 class="mt-4 mb-2">Shipment Details</h5>`;
+          html += `    <div class="row sparkboxes mt-3">`;
+          const totalShipments = temp["Number of Shipments:"] && temp["Number of Shipments:"][0] ? temp["Number of Shipments:"][0] : "None";
+          html += `      <div class="col-md-4"><div class="box box3 shadow"><h6>Number of Shipments</h6>${totalShipments}</div></div>`;
+          const avgShipmentVolume = temp["Average Shipment Volume:"] && temp["Average Shipment Volume:"][0] ? parseFloat(temp["Average Shipment Volume:"][0]).toFixed(2) : "None";
+          html += `      <div class="col-md-4"><div class="box box4 shadow"><h6>Average Shipment Volume</h6>${avgShipmentVolume}</div></div>`;
+          const totalShipmentVolume = temp["Total Shipment Volume:"] && temp["Total Shipment Volume:"][0] ? temp["Total Shipment Volume:"][0] : "None";
+          html += `      <div class="col-md-4"><div class="box box5 shadow"><h6>Total Shipment Volume</h6>${totalShipmentVolume}</div></div>`;
+          html += `    </div>`;
+          html += `  </div>`; // close Overview tab
+          
+          // Disruptions Tab
+          html += `  <div class="tab-pane fade" id="disruptions" role="tabpanel">`;
+          html += `    <div class="row mt-4 mb-5">`;
+          html += `      <div class="col-md-12">`;
+          html += `        <div class="box shadow">`;
+          html += `          <h6>Disruption Impact Distribution</h6>`;
+          html += `          <div id="disruptionBarChart"></div>`;
+          html += `        </div>`;
+          html += `      </div>`;
+          html += `    </div>`;
+          html += `  </div>`; // close Disruptions tab
+          
+          // Shipment Status Tab
+          html += `  <div class="tab-pane fade" id="shipment-status" role="tabpanel">`;
+          html += `    <div class="row mt-4 mb-5">`;
+          html += `      <div class="col-md-7">`;
+          html += `        <div class="box shadow">`;
+          html += `          <h6>Shipment List</h6>`;
+          html += `          <p>Content coming soon</p>`;
+          html += `        </div>`;
+          html += `      </div>`;
+          html += `      <div class="col-md-5">`;
+          html += `        <div class="box shadow" style="min-height: 450px; padding-bottom: 40px;">`;
+          html += `          <h6>Shipment Status pie chart</h6>`;
+          html += `          <p>Content coming soon</p>`;
+          html += `        </div>`;
+          html += `      </div>`;
+          html += `    </div>`;
+          html += `  </div>`; // close Shipment Status tab
+          
+          // Products Handled Tab
+          let products = temp["Products Handeled List:"];
+          html += `  <div class="tab-pane fade" id="products" role="tabpanel">`;
+          html += `    <div class="row mt-4 mb-5">`;
+          html += `      <div class="col-md-12">`;
+          html += `        <div class="box shadow"><h6>Products Handled</h6>${makeTableHTML(products)}</div>`;
+          html += `      </div>`;
+          html += `    </div>`;
+          html += `  </div>`; // close Products Handled tab
+          
+          html += `</div>`; // close tab-content
+          
+          document.getElementById("temp").innerHTML = html;
+          
+          // Create disruption bar chart using the new modular function
+          setTimeout(function() {
+            if (temp["Impacts(low,medium,high):"] && temp["Impacts(low,medium,high):"].length === 3) {
+              createBarChart('disruptionBarChart', {
+                labels: ['Low Impact', 'Medium Impact', 'High Impact'],
+                values: temp["Impacts(low,medium,high):"],
+                colors: ['#00E396', '#FEB019', '#FF4560']
+              }, {
+                xAxisTitle: 'Impact Type',
+                yAxisTitle: 'Count',
+                seriesName: 'Count',
+                tooltipFormatter: (val) => val + " events"
+              });
+            }
+          }, 100);
+        }
+      };
+      
+      var url = "transactions_page.php?" + new URLSearchParams(inputs).toString();
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+  </script>
+
+  <div id="temp"></div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies for tab functionality -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
