@@ -8,5 +8,6 @@ JOIN DisruptionCategory AS dc
     ON dc.CategoryID = e.CategoryID
 WHERE
     e.EventRecoveryDate IS NULL
-    OR e.EventRecoveryDate > CURRENT_DATE
+    OR e.EventRecoveryDate >= CURRENT_DATE
+    OR e.EventDate >= CURRENT_DATE
 ORDER BY e.EventDate ASC;
