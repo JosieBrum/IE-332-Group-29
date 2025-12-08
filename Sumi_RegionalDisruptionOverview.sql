@@ -3,7 +3,7 @@ SELECT
     l.ContinentName,
     COUNT(DISTINCT CASE WHEN ic.ImpactLevel = 'High' THEN de.EventID END) AS HighImpactEvents,
     total.TotalEvents,
-    (COUNT(DISTINCT CASE WHEN ic.ImpactLevel = 'High' THEN de.EventID END) / total.TotalEvents) AS PercentHigh
+    (COUNT(DISTINCT CASE WHEN ic.ImpactLevel = 'High' THEN de.EventID END) * 100 / total.TotalEvents) AS PercentHigh
 FROM DisruptionEvent de
 JOIN ImpactsCompany ic ON ic.EventID = de.EventID
 JOIN Company c ON ic.AffectedCompanyID = c.CompanyID
@@ -14,7 +14,7 @@ CROSS JOIN (
     WHERE
       e2.EventDate <= '2025-12-31' AND e2.EventRecoveryDate >= '2019-01-01'
       AND EXISTS (
-        SELECT 1
+        SELECT *
         FROM ImpactsCompany ic2
         JOIN Company  c2 ON c2.CompanyID  = ic2.AffectedCompanyID
         JOIN Location l2 ON l2.LocationID = c2.LocationID
@@ -34,3 +34,4 @@ GROUP BY
     total.TotalEvents
 ORDER BY
     HighImpactEvents DESC;
+
