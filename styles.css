@@ -1,0 +1,138 @@
+
+body {
+  background: #F3F4FA !important;
+  color: #777;
+  font-family: Montserrat, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, strong {
+  font-weight: 600;
+}
+
+#area-adwords {
+  min-height: 421px !important;
+  margin-right: -20px;
+}
+
+.content-area {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.box {
+  background-color: #fff;
+  padding: 25px 20px;
+
+}
+
+.shadow {
+  box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.08);
+}
+.sparkboxes .box {
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-shadow: 0 1px 1px 1px #666;
+  box-shadow: 0px 1px 15px 1px rgba(69, 65, 78, 0.08);
+  position: relative;
+}
+
+
+.sparkboxes strong {
+  position: relative;
+  z-index: 3;
+  top: -8px;
+  color: #fff;
+}
+
+
+.sparkboxes .box1 {
+  border-bottom: 3px solid #734CEA;
+}
+
+.sparkboxes .box2 {
+  border-bottom: 3px solid #34bfa3;
+}
+
+.sparkboxes .box3 {
+  border-bottom: 3px solid #f4516c;
+}
+
+.sparkboxes .box4 {
+  border-bottom: 3px solid #00c5dc;
+}
+
+.sparkboxes .box5 {
+  border-bottom: 3px solid #f8c048;
+}
+
+.sparkboxes .box6 {
+  border-bottom: 3px solid #065c8b;
+}
+
+.sparkboxes .box7 {
+  border-bottom: 3px solid #f38212;
+}
+
+.spinner-border {
+  display: none;
+}
+
+/* Vertical sidebar navigation */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 200px;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  padding: 20px 0;
+  z-index: 1000;
+}
+
+.sidebar .logo {
+  padding: 0 20px 30px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.sidebar .logo img {
+  max-height: 50px;
+  max-width: 100%;
+  height: auto;
+}
+
+.sidebar .nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar .nav-links li {
+  margin: 0;
+}
+
+.sidebar .nav-links a {
+  display: block;
+  padding: 15px 20px;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s;
+  border-left: 3px solid transparent;
+  font-weight: 500;
+}
+
+.sidebar .nav-links a:hover,
+.sidebar .nav-links a.active {
+  background-color: #f5f5f5;
+  border-left-color: #007bff;
+  color: #007bff;
+}
+
+/* Adjust main content to account for sidebar */
+.main-content {
+  margin-left: 200px;
+  padding: 20px;
+}
+
+
