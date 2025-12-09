@@ -33,6 +33,10 @@ SELECT EXISTS(
 INSERT INTO Company (CompanyName, TierLevel, Type, LocationID)
 VALUES ('', '', '', '');
 
+SELECT CompanyID 
+FROM Company
+WHERE CompanyName = '';
+
 -- Query 4A: Insert into Manufacturer table
 INSERT INTO Manufacturer (CompanyID, FactoryCapacity)
 VALUES (LAST_INSERT_ID(), '');
