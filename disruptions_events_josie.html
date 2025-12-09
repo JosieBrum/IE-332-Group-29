@@ -1,0 +1,608 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"> <!-- input form style -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+  <link rel="stylesheet" href="styles.css?v=3" />  <!-- general css style -->
+
+  <script src="https://cdn.plot.ly/plotly-3.3.0.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="chart-utils.js?v=7"></script>
+  
+  <style>
+    /* Remove list style from nav tabs */
+    .nav-tabs {
+      list-style: none;
+      padding-left: 0;
+    }
+    .nav-tabs .nav-item {
+      list-style: none;
+    }
+    /* Add padding at bottom to create buffer */
+    #wrapper {
+      padding-bottom: 50px;
+    }
+  </style>
+
+  <title>Disruption Events</title>
+
+</head>
+
+<body>
+
+  <!-- Modular Navbar -->
+  <div id="navbar"></div>
+  <script>
+    fetch('navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+        // Highlight current page in navbar
+        const links = document.querySelectorAll('#navbar .nav-links a');
+        const currentPage = location.pathname.split('/').pop();
+        links.forEach(link => {
+          if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      });
+  </script>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+     <!-- Page Title --> 
+    <h3>Disruption Events</h3>
+
+  <div class="box shadow">
+    <!-- This form is used to search for disruption events -->
+    <form action= "" onsubmit="showCustomer()">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+          <select name="searchType" id="searchType" onchange="updateSearchFields()" required>
+            <option value="">Select search type</option>
+            <option value="company">Company</option>
+            <option value="continent">Continent</option>
+            <option value="country">Country</option>
+            <option value="tier">Tier</option>
+            <option value="tier_continent">Tier & Continent</option>
+            <option value="tier_country">Tier & Country</option>
+          </select>
+          
+          <div id="searchFields"></div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+            <input type="date" name="date1" id="date1" placeholder = "Enter starting date">
+            <input type= "date" name ="date2" id="date2" placeholder = "Enter ending date">
+            <input type= "submit" name = "submit-btn" value="Search">
+          </div>
+        </div>
+        <div id="errorMessage" class="mt-3" style="color: red; display: none;"></div>
+    </form>
+  </div>
+
+  <!-- Tabs for different chart views (hidden until search is performed) -->
+  <div class="mt-4" id="chartTabsContainer" style="display: none;">
+    <ul class="nav nav-tabs" id="chartTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="df-tab" data-toggle="tab" href="#df" role="tab">DF</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="art-tab" data-toggle="tab" href="#art" role="tab">ART</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="hdr-tab" data-toggle="tab" href="#hdr" role="tab">HDR</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="td-tab" data-toggle="tab" href="#td" role="tab">TD</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="rrc-tab" data-toggle="tab" href="#rrc" role="tab">RRC</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="dsd-tab" data-toggle="tab" href="#dsd" role="tab">DSD</a>
+      </li>
+    </ul>
+
+    <div class="tab-content mt-3" id="chartTabsContent">
+      <div class="tab-pane fade show active" id="df" role="tabpanel">
+        <h5 class="mt-3">Disruption Frequency</h5>
+        <div class="box shadow">
+          <div id="dfChart"></div>
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="art" role="tabpanel">
+        <h5 class="mt-3">Average Recovery Time</h5>
+        <div class="box shadow">
+          <div id="artTotalDisplay" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">Loading...</div>
+          <div id="artHistogram" style="width: 100%; height: 450px;"></div>
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="hdr" role="tabpanel">
+        <h5 class="mt-3">High-Impact Disruption Rate</h5>
+        <div class="row mt-4 mb-5">
+          <div class="col-md-6">
+            <div class="box shadow" style="min-height: 550px; padding-bottom: 20px;">
+              <div id="hdrTotalDisplay" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">Loading...</div>
+              <h6>Contribution to HDR by Company</h6>
+              <div id="hdrPieChart"><p style="text-align: center; padding: 40px; color: #6c757d;">Loading chart...</p></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="box shadow" style="min-height: 550px;">
+              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; font-weight: bold; border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 10px;">
+                <div>Company</div>
+                <div>HDR</div>
+              </div>
+              <div id="hdrTableBody"><p style="text-align: center; padding: 20px; color: #6c757d;">Loading...</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="td" role="tabpanel">
+        <h5 class="mt-3">Total Downtime</h5>
+        <div class="box shadow">
+          <div id="tdTotalDisplay" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">Loading...</div>
+          <div id="tdHistogram" style="width: 100%; height: 450px;"></div>
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="rrc" role="tabpanel">
+        <h5 class="mt-3">Regional Risk Concentration</h5>
+        <div class="box shadow">
+          <div id="rrcError" style="display: none; padding: 20px; text-align: center; color: #856404; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
+            <strong>Note:</strong> Regional Risk Concentration chart requires a country or continent to be selected in the search.
+          </div>
+          <div id="rrcChart" style="width: 100%; height: 450px;"></div>
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="dsd" role="tabpanel">
+        <h5 class="mt-3">Disruption Severity Distribution</h5>
+        <div class="box shadow">
+          <div id="dsdChart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- This Div with id=tester is used to act as a placeholder for the plot. -->
+  <div id="tester" style="width:600px;height:250px;"></div>
+
+  <script>
+    // ISO-3 codes → Country Names
+    const countryToISO3 = {
+      "Algeria":"DZA","Angola":"AGO","Benin":"BEN","Botswana":"BWA","Burkina Faso":"BFA",
+      "Burundi":"BDI","Cabo Verde":"CPV","Cameroon":"CMR","Central African Republic":"CAF","Chad":"TCD",
+      "Comoros":"COM","Congo":"COG","Democratic Republic of the Congo":"COD","Côte d'Ivoire":"CIV","Djibouti":"DJI",
+      "Egypt":"EGY","Equatorial Guinea":"GNQ","Eritrea":"ERI","Eswatini":"SWZ","Ethiopia":"ETH",
+      "Gabon":"GAB","Gambia":"GMB","Ghana":"GHA","Guinea":"GIN","Guinea-Bissau":"GNB",
+      "Kenya":"KEN","Lesotho":"LSO","Liberia":"LBR","Libya":"LBY","Madagascar":"MDG",
+      "Malawi":"MWI","Mali":"MLI","Mauritania":"MRT","Mauritius":"MUS","Mayotte":"MYT",
+      "Morocco":"MAR","Mozambique":"MOZ","Namibia":"NAM","Niger":"NER","Nigeria":"NGA",
+      "Réunion":"REU","Rwanda":"RWA","Saint Helena":"SHN","Sao Tome and Principe":"STP","Senegal":"SEN",
+      "Seychelles":"SYC","Sierra Leone":"SLE","Somalia":"SOM","South Africa":"ZAF","South Sudan":"SSD",
+      "Sudan":"SDN","Tanzania":"TZA","Togo":"TGO","Tunisia":"TUN","Uganda":"UGA",
+      "Western Sahara":"ESH","Zambia":"ZMB","Zimbabwe":"ZWE",
+      "Åland Islands":"ALA","Albania":"ALB","Andorra":"AND","Austria":"AUT","Belarus":"BLR",
+      "Belgium":"BEL","Bosnia and Herzegovina":"BIH","Bulgaria":"BGR","Croatia":"HRV","Czechia":"CZE",
+      "Denmark":"DNK","Estonia":"EST","Faroe Islands":"FRO","Finland":"FIN","France":"FRA",
+      "Germany":"DEU","Gibraltar":"GIB","Greece":"GRC","Guernsey":"GGY","Holy See":"VAT",
+      "Hungary":"HUN","Iceland":"ISL","Ireland":"IRL","Isle of Man":"IMN","Italy":"ITA",
+      "Jersey":"JEY","Latvia":"LVA","Liechtenstein":"LIE","Lithuania":"LTU","Luxembourg":"LUX",
+      "Malta":"MLT","Moldova":"MDA","Monaco":"MCO","Montenegro":"MNE","Netherlands":"NLD",
+      "North Macedonia":"MKD","Norway":"NOR","Poland":"POL","Portugal":"PRT","Romania":"ROU",
+      "Russia":"RUS","San Marino":"SMR","Serbia":"SRB","Slovakia":"SVK","Slovenia":"SVN",
+      "Spain":"ESP","Svalbard and Jan Mayen":"SJM","Sweden":"SWE","Switzerland":"CHE","Ukraine":"UKR",
+      "United Kingdom":"GBR",
+      "Afghanistan":"AFG","Armenia":"ARM","Azerbaijan":"AZE","Bahrain":"BHR","Bangladesh":"BGD",
+      "Bhutan":"BTN","Brunei":"BRN","Cambodia":"KHM","China":"CHN","Cyprus":"CYP",
+      "Georgia":"GEO","Hong Kong":"HKG","India":"IND","Indonesia":"IDN","Iran":"IRN",
+      "Iraq":"IRQ","Israel":"ISR","Japan":"JPN","Jordan":"JOR","Kazakhstan":"KAZ",
+      "North Korea":"PRK","South Korea":"KOR","Kuwait":"KWT","Kyrgyzstan":"KGZ","Laos":"LAO",
+      "Lebanon":"LBN","Macau":"MAC","Malaysia":"MYS","Maldives":"MDV","Mongolia":"MNG",
+      "Myanmar":"MMR","Nepal":"NPL","Oman":"OMN","Pakistan":"PAK","Palestine":"PSE",
+      "Philippines":"PHL","Qatar":"QAT","Saudi Arabia":"SAU","Singapore":"SGP","Sri Lanka":"LKA",
+      "Syria":"SYR","Tajikistan":"TJK","Thailand":"THA","Timor-Leste":"TLS","Turkey":"TUR",
+      "Turkmenistan":"TKM","United Arab Emirates":"ARE","Uzbekistan":"UZB","Vietnam":"VNM","Yemen":"YEM",
+      "Anguilla":"AIA","Antigua and Barbuda":"ATG","Aruba":"ABW","Bahamas":"BHS","Barbados":"BRB",
+      "Belize":"BLZ","Bermuda":"BMU","Bonaire, Sint Eustatius and Saba":"BES","Canada":"CAN","Cayman Islands":"CYM",
+      "Costa Rica":"CRI","Cuba":"CUB","Curaçao":"CUW","Dominica":"DMA","Dominican Republic":"DOM",
+      "El Salvador":"SLV","Greenland":"GRL","Grenada":"GRD","Guadeloupe":"GLP","Guatemala":"GTM",
+      "Haiti":"HTI","Honduras":"HND","Jamaica":"JAM","Martinique":"MTQ","Mexico":"MEX",
+      "Montserrat":"MSR","Nicaragua":"NIC","Panama":"PAN","Puerto Rico":"PRI","Saint Barthélemy":"BLM",
+      "Saint Kitts and Nevis":"KNA","Saint Lucia":"LCA","Saint Martin":"MAF","Saint Pierre and Miquelon":"SPM","Saint Vincent and the Grenadines":"VCT",
+      "Sint Maarten":"SXM","Trinidad and Tobago":"TTO","Turks and Caicos Islands":"TCA","United States":"USA","British Virgin Islands":"VGB","U.S. Virgin Islands":"VIR",
+      "Argentina":"ARG","Bolivia":"BOL","Bouvet Island":"BVT","Brazil":"BRA","Chile":"CHL",
+      "Colombia":"COL","Ecuador":"ECU","Falkland Islands":"FLK","French Guiana":"GUF","Guyana":"GUY",
+      "Paraguay":"PRY","Peru":"PER","South Georgia and the South Sandwich Islands":"SGS","Suriname":"SUR","Uruguay":"URY","Venezuela":"VEN",
+      "American Samoa":"ASM","Australia":"AUS","Christmas Island":"CXR","Cocos (Keeling) Islands":"CCK","Cook Islands":"COK",
+      "Fiji":"FJI","French Polynesia":"PYF","Guam":"GUM","Heard Island and McDonald Islands":"HMD","Kiribati":"KIR",
+      "Marshall Islands":"MHL","Micronesia":"FSM","Nauru":"NRU","New Caledonia":"NCL","New Zealand":"NZL",
+      "Niue":"NIU","Norfolk Island":"NFK","Northern Mariana Islands":"MNP","Palau":"PLW","Papua New Guinea":"PNG",
+      "Pitcairn Islands":"PCN","Samoa":"WSM","Solomon Islands":"SLB","Tokelau":"TKL","Tonga":"TON",
+      "Tuvalu":"TUV","U.S. Minor Outlying Islands":"UMI","Vanuatu":"VUT","Wallis and Futuna":"WLF"
+    };
+
+    // Continent → ISO-3 country lists
+    const continentCountries = {
+      "Africa": [
+        "DZA", "AGO", "BEN", "BWA", "IOT", "BFA", "BDI", "CPV", "CMR", "CAF",
+        "TCD", "COM", "COG", "COD", "CIV", "DJI", "EGY", "GNQ", "ERI", "SWZ",
+        "ETH", "ATF", "GAB", "GMB", "GHA", "GIN", "GNB", "KEN", "LSO", "LBR",
+        "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MYT", "MAR", "MOZ", "NAM",
+        "NER", "NGA", "REU", "RWA", "SHN", "STP", "SEN", "SYC", "SLE", "SOM",
+        "ZAF", "SSD", "SDN", "TZA", "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE"],
+   
+      "Europe": [
+        "ALA", "ALB", "AND", "AUT", "BLR", "BEL", "BIH", "BGR", "HRV", "CZE",
+        "DNK", "EST", "FRO", "FIN", "FRA", "DEU", "GIB", "GRC", "GGY", "VAT",
+        "HUN", "ISL", "IRL", "IMN", "ITA", "JEY", "LVA", "LIE", "LTU", "LUX",
+        "MLT", "MDA", "MCO", "MNE", "NLD", "MKD", "NOR", "POL", "PRT", "ROU",
+        "RUS", "SMR", "SRB", "SVK", "SVN", "ESP", "SJM", "SWE", "CHE", "UKR",
+        "GBR"],
+   
+      "Asia": [
+        "AFG", "ARM", "AZE", "BHR", "BGD", "BTN", "BRN", "KHM", "CHN", "CYP",
+        "GEO", "HKG", "IND", "IDN", "IRN", "IRQ", "ISR", "JPN", "JOR", "KAZ",
+        "PRK", "KOR", "KWT", "KGZ", "LAO", "LBN", "MAC", "MYS", "MDV", "MNG",
+        "MMR", "NPL", "OMN", "PAK", "PSE", "PHL", "QAT", "SAU", "SGP", "LKA",
+        "SYR", "TJK", "THA", "TLS", "TUR", "TKM", "ARE", "UZB", "VNM", "YEM"],
+       
+      "North America": [
+        "AIA", "ATG", "ABW", "BHS", "BRB", "BLZ", "BMU", "BES", "CAN", "CYM",
+        "CRI", "CUB", "CUW", "DMA", "DOM", "SLV", "GRL", "GRD", "GLP", "GTM",
+        "HTI", "HND", "JAM", "MTQ", "MEX", "MSR", "NIC", "PAN", "PRI", "BLM",
+        "KNA", "LCA", "MAF", "SPM", "VCT", "SXM", "TTO", "TCA", "USA", "VGB",
+        "VIR"],
+       
+      "South America": [
+        "ARG", "BOL", "BVT", "BRA", "CHL", "COL", "ECU", "FLK", "GUF", "GUY",
+        "PRY", "PER", "SGS", "SUR", "URY", "VEN"],
+         
+      "Oceania": [
+        "ASM", "AUS", "CXR", "CCK", "COK", "FJI", "PYF", "GUM", "HMD", "KIR",
+        "MHL", "FSM", "NRU", "NCL", "NZL", "NIU", "NFK", "MNP", "PLW", "PNG",
+        "PCN", "WSM", "SLB", "TKL", "TON", "TUV", "UMI", "VUT", "WLF"]
+    };
+
+    function updateSearchFields() {
+      const searchType = document.getElementById("searchType").value;
+      const searchFieldsDiv = document.getElementById("searchFields");
+      
+      let html = '';
+      
+      switch(searchType) {
+        case 'company':
+          html = '<input type="text" name="company" id="company" placeholder="Enter company" required>';
+          break;
+        case 'continent':
+          html = `<select name="continent" id="continent" required>
+            <option value="">Select continent</option>
+            <option value="Africa">Africa</option>
+            <option value="Asia">Asia</option>
+            <option value="Europe">Europe</option>
+            <option value="North America">North America</option>
+            <option value="Oceania">Oceania</option>
+            <option value="South America">South America</option>
+          </select>`;
+          break;
+        case 'country':
+          html = '<input type="text" name="country" id="country" placeholder="Enter country" required>';
+          break;
+        case 'tier':
+          html = `<select name="tier" id="tier" required>
+            <option value="">Select tier</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>`;
+          break;
+        case 'tier_continent':
+          html = `<div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+            <select name="tier" id="tier" required>
+              <option value="">Select tier</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <select name="continent" id="continent" required>
+              <option value="">Select continent</option>
+              <option value="Africa">Africa</option>
+              <option value="Asia">Asia</option>
+              <option value="Europe">Europe</option>
+              <option value="North America">North America</option>
+              <option value="Oceania">Oceania</option>
+              <option value="South America">South America</option>
+            </select>
+          </div>`;
+          break;
+        case 'tier_country':
+          html = `<div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+            <select name="tier" id="tier" required>
+              <option value="">Select tier</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <input type="text" name="country" id="country" placeholder="Enter country" required>
+          </div>`;
+          break;
+        default:
+          html = '';
+      }
+      
+      searchFieldsDiv.innerHTML = html;
+    }
+    
+    function showCustomer() {
+      // Clear previous error message
+      const errorMessageDiv = document.getElementById("errorMessage");
+      errorMessageDiv.style.display = "none";
+      errorMessageDiv.textContent = "";
+      
+      // Clear all chart containers and reset to loading state
+      document.getElementById("dfChart").innerHTML = '';
+      document.getElementById("dsdChart").innerHTML = '';
+      document.getElementById("hdrTotalDisplay").textContent = "Loading...";
+      document.getElementById("hdrPieChart").innerHTML = '';
+      document.getElementById("hdrTableBody").innerHTML = '<p style="text-align: center; padding: 20px; color: #6c757d;">Loading...</p>';
+      document.getElementById("rrcError").style.display = "none";
+      document.getElementById("rrcChart").innerHTML = "";
+      
+      // Hide tabs container until search is successful
+      document.getElementById("chartTabsContainer").style.display = "none";
+
+      //https://code-boxx.com/javascript-fetch-get-query-params/
+      var feilds = ["company", "tier", "country", "continent", "date1", "date2"];
+      var inputs = {};
+      for (var key = 0; key < feilds.length; key++) {
+        if (document.getElementById(feilds[key])) {
+          if (document.getElementById(feilds[key]).value != "") {
+            inputs[feilds[key]] = document.getElementById(feilds[key]).value;
+          }
+        }
+      }
+      
+      // Set default dates if not provided
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+      
+      // If no end date provided, use today
+      if (!inputs["date2"]) {
+        const todayStr = today.toISOString().split('T')[0];
+        inputs["date2"] = todayStr;
+        document.getElementById("date2").value = todayStr;
+      }
+      
+      // If no start date provided, use 2019-01-01 (start of database)
+      if (!inputs["date1"]) {
+        const dbStartDate = '2019-01-01';
+        inputs["date1"] = dbStartDate;
+        document.getElementById("date1").value = dbStartDate;
+      }
+      
+      // Validate dates
+      const startDate = new Date(inputs["date1"]);
+      const endDate = new Date(inputs["date2"]);
+
+      // Check if end date is before start date
+      if (endDate < startDate) {
+        errorMessageDiv.textContent = "The ending date cannot be before the starting date.";
+        errorMessageDiv.style.display = "block";
+        event.preventDefault();
+        return;
+      }
+
+      // Check if either date is after today
+      if (startDate > today) {
+        errorMessageDiv.textContent = "The starting date cannot be after today's date.";
+        errorMessageDiv.style.display = "block";
+        event.preventDefault();
+        return;
+      }
+
+      if (endDate > today) {
+        errorMessageDiv.textContent = "The ending date cannot be after today's date.";
+        errorMessageDiv.style.display = "block";
+        event.preventDefault();
+        return;
+      }
+      
+      console.log(inputs);
+      event.preventDefault();
+      var xhttp;
+      xhttp = new XMLHttpRequest();
+      xhttp.onload = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+          
+          // Validate company name if it was provided
+          if (inputs["company"]) {
+            const companyListAll = temp["Company Name List All: "];
+            const enteredCompany = inputs["company"].trim();
+            
+            if (companyListAll && companyListAll.length > 0 && !companyListAll.includes(enteredCompany)) {
+              const errorMessageDiv = document.getElementById("errorMessage");
+              errorMessageDiv.textContent = "Company '" + enteredCompany + "' not found in database. Please check the spelling and try again.";
+              errorMessageDiv.style.display = "block";
+              return;
+            }
+          }
+          
+          // Validate country name if it was provided
+          if (inputs["country"]) {
+            const countryListAll = temp["Country Name List All: "];
+            const enteredCountry = inputs["country"].trim();
+            
+            if (countryListAll && countryListAll.length > 0 && !countryListAll.includes(enteredCountry)) {
+              const errorMessageDiv = document.getElementById("errorMessage");
+              errorMessageDiv.textContent = "Country '" + enteredCountry + "' not found in database. Please check the spelling and try again.";
+              errorMessageDiv.style.display = "block";
+              return;
+            }
+          }
+          
+          // Show the tabs container after successful search
+          document.getElementById("chartTabsContainer").style.display = "block";
+          
+          // Create DF bar chart
+          if (temp["Company Name DF: "] && temp["DF: "]) {
+            createBarChart("dfChart", {
+              labels: temp["Company Name DF: "],
+              values: temp["DF: "]
+            }, {
+              xAxisTitle: "Company",
+              yAxisTitle: "Disruption Frequency"
+            });
+          }
+          
+          // Create DSD stacked bar chart
+          if (temp["Company Name DSD: "] && temp["Low Count: "] && temp["Medium Count: "] && temp["High Count: "]) {
+            createStackedBarChart("dsdChart", {
+              categories: temp["Company Name DSD: "],
+              series: [
+                { name: "Low", data: temp["Low Count: "] },
+                { name: "Medium", data: temp["Medium Count: "] },
+                { name: "High", data: temp["High Count: "] }
+              ]
+            }, {
+              xAxisTitle: "Company",
+              yAxisTitle: "Count",
+              colors: ['#00E396', '#FEB019', '#FF4560']
+            });
+          }
+          
+          // Create HDR visualizations
+          if (temp["HRD Overall: "] && temp["Company Name HRD Percent: "] && temp["HDR Percents: "] && 
+              temp["Company Name HRD: "] && temp["HDR Company Scores: "]) {
+            
+            // Display total HDR
+            const totalHDR = Number(temp["HRD Overall: "][0]).toFixed(2);
+            document.getElementById("hdrTotalDisplay").textContent = "Overall HDR: " + totalHDR + "%";
+            
+            // Check if all HDRs are zero
+            const allHDRsZero = temp["HDR Company Scores: "].every(score => Number(score) === 0);
+            
+            // Create pie chart for HDR contribution by company (only if there are non-zero values)
+            if (!allHDRsZero && temp["HDR Percents: "].some(val => val !== null && Number(val) > 0)) {
+              createColorfulPieChart("hdrPieChart", {
+                labels: temp["Company Name HRD Percent: "],
+                values: temp["HDR Percents: "]
+              }, {
+                height: 480,
+                legendPosition: 'bottom',
+                legendHeight: 80
+              });
+            } else {
+              document.getElementById("hdrPieChart").innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">All HDRs are zero.</p>';
+            }
+            
+            // Create table for HDR company scores
+            let tableHTML = '<div style="max-height: 400px; overflow-y: auto;">';
+            for (let i = 0; i < temp["Company Name HRD: "].length; i++) {
+              const score = Number(temp["HDR Company Scores: "][i]).toFixed(2);
+              tableHTML += `<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #eee;">`;
+              tableHTML += `<div>${temp["Company Name HRD: "][i]}</div>`;
+              tableHTML += `<div>${score}</div>`;
+              tableHTML += `</div>`;
+            }
+            tableHTML += '</div>';
+            document.getElementById("hdrTableBody").innerHTML = tableHTML;
+          }
+          
+          // Create TD histogram
+          console.log("RecoveryDays data:", temp["RecoveryDays: "]);
+          console.log("typeof createHistogram:", typeof createHistogram);
+          if (temp["RecoveryDays: "] && temp["RecoveryDays: "].length > 0) {
+            console.log("Creating TD histogram with", temp["RecoveryDays: "].length, "data points");
+            try {
+              // Calculate total downtime (sum of all recovery days)
+              const totalDowntime = temp["RecoveryDays: "].reduce((sum, val) => sum + Number(val), 0);
+              document.getElementById("tdTotalDisplay").innerHTML = `Overall Total Downtime: ${totalDowntime.toFixed(0)} days`;
+              
+              createHistogram("tdHistogram", temp["RecoveryDays: "], "Total Downtime Distribution", "Downtime (days)", "Count");
+              console.log("TD histogram creation completed");
+            } catch(e) {
+              console.error("Error creating TD histogram:", e);
+            }
+          } else {
+            console.log("No RecoveryDays data, showing fallback message");
+            document.getElementById("tdTotalDisplay").innerHTML = 'Overall Total Downtime: N/A';
+            document.getElementById("tdHistogram").innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">No downtime data available.</p>';
+          }
+          
+          // Create ART histogram (same data, different presentation)
+          if (temp["RecoveryDays: "] && temp["RecoveryDays: "].length > 0) {
+            console.log("Creating ART histogram with", temp["RecoveryDays: "].length, "data points");
+            try {
+              // Calculate average recovery time
+              const avgRecoveryTime = temp["RecoveryDays: "].reduce((sum, val) => sum + Number(val), 0) / temp["RecoveryDays: "].length;
+              document.getElementById("artTotalDisplay").innerHTML = `Overall Average Recovery Time: ${avgRecoveryTime.toFixed(2)} days`;
+              
+              createHistogram("artHistogram", temp["RecoveryDays: "], "Recovery Time Distribution", "Recovery Time (days)", "Count");
+              console.log("ART histogram creation completed");
+            } catch(e) {
+              console.error("Error creating ART histogram:", e);
+            }
+          } else {
+            console.log("No RecoveryDays data for ART, showing fallback message");
+            document.getElementById("artTotalDisplay").innerHTML = 'Overall Average Recovery Time: N/A';
+            document.getElementById("artHistogram").innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">No recovery time data available.</p>';
+          }
+          
+          // Handle RRC chart - show error if country/continent not provided
+          const hasCountryOrContinent = inputs["country"] || inputs["continent"];
+          if (hasCountryOrContinent) {
+            document.getElementById("rrcError").style.display = "none";
+            document.getElementById("rrcChart").style.display = "block";
+            
+            // Create RRC map using modular function
+            if (temp.RRC && temp.RRC.length > 0) {
+              createRRCMap("rrcChart", temp.RRC, countryToISO3, continentCountries);
+            } else {
+              document.getElementById("rrcChart").innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">No RRC data available for the selected region.</p>';
+            }
+          } else {
+            document.getElementById("rrcError").style.display = "block";
+            document.getElementById("rrcChart").style.display = "none";
+          }
+        }
+      };
+      //https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
+      //https://attacomsian.com/blog/javascript-convert-object-to-query-string-parameters
+      var url = "disruption_events.php?" + new URLSearchParams(inputs).toString();
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+  </script>
+
+  <div id="temp"></div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies for tab functionality -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
