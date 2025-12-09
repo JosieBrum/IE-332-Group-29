@@ -4,16 +4,25 @@ SELECT EXISTS(
     FROM Location 
     WHERE City = '' 
       AND CountryName = ''
-      AND ContinentName = '';
+      AND ContinentName = ''
 ) AS LocationIDExists;
+
+--If Exists get LocationID
+
+SELECT LocationID 
+FROM Location 
+WHERE City = '' 
+  AND CountryName = ''
+  AND ContinentName = '';
 
 -- If LocationID does not exist, insert new location
 INSERT INTO Location (City, CountryName, ContinentName)
 VALUES ('', '', '');
 
+
 --Then User inputs Company Name
 
--- Query 2: Check if Company Name Already Exists
+-- Query : Check if Company Name Already Exists
 SELECT EXISTS(
     SELECT 1 
     FROM Company 
