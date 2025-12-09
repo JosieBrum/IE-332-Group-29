@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Active Events</title>
+</head>
+<body>
+<h2>Active Events</h2>
+<pre id="output">Loading...</pre>
+
+<script>
+// Function to fetch and display the events
+function fetchEvents() {
+    const phpUrl = "alerts.php"; // <-- Your PHP file
+    console.log("PHP URL being called:", phpUrl); // View the URL in the console
+
+    fetch(phpUrl)
+        .then(response => response.json()) // PHP returns JSON
+        .then(data => {
+            document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+            console.log("PHP output:", data);
+        })
+        .catch(err => {
+            console.error("Error fetching events:", err);
+            document.getElementById("output").textContent = "Error fetching events";
+        });
+}
+
+// Auto-run when page loads
+window.onload = fetchEvents;
+</script>
+</body>
+</html>
+

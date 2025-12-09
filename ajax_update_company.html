@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RRC Map</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script src="https://cdn.plot.ly/plotly-3.3.0.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li><strong>Company Info</strong></li>
+    </ul>
+  </nav>
+<form id="companyForm">
+  <label>Current Company Name:
+    <input type="text" id="name" placeholder="Required">
+  </label>
+  <label>New Company Name:
+    <input type="text" id="newName" placeholder="Leave blank to keep current">
+  </label>
+  <label>Tier Level:
+    <input type="text" id="tier" placeholder="Leave blank to keep current">
+  </label>
+  <label>Factory Capacity:
+    <input type="text" id="capacity" placeholder="Leave blank to keep current">
+  </label>
+  <label>From Company:
+    <input type="text" id="from" placeholder="Distributor only">
+  </label>
+  <label>To Company:
+    <input type="text" id="to" placeholder="Distributor only">
+  </label>
+    <label>From Company O:
+    <input type="text" id="fromo" placeholder="Distributor only">
+  </label>
+  <label>To Company O:
+    <input type="text" id="too" placeholder="Distributor only">
+  </label>
+  <input type="submit" value="Update">
+</form>
+
+<div id="result"></div>
+
+<script>
+document.getElementById('companyForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const data = {};
+    ['name','newName','tier','capacity','from','to', 'fromo', 'too'].forEach(id=>{
+        const val = document.getElementById(id).value.trim();
+        if(val) data[id] = val;
+    });
+    fetch('updates.php?' + new URLSearchParams(data))
+        .then(res=>res.json())
+        .then(json=>document.getElementById('result').innerText=json.message)
+        .catch(err=>document.getElementById('result').innerText="Error: "+err);
+});
+</script>
+
+</body>
+</html>
