@@ -1,9 +1,11 @@
--- Query 1: Get LocationID from City and Country
-SELECT LocationID 
-FROM Location 
-WHERE City = '' 
-  AND CountryName = ''
-  AND ContinentName = '';
+-- Query 1: Check if LocationID  Already Exists
+SELECT EXISTS(
+    SELECT 1 
+    FROM Location 
+    WHERE City = '' 
+      AND CountryName = ''
+      AND ContinentName = '';
+) AS LocationIDExists;
 
 -- If LocationID does not exist, insert new location
 INSERT INTO Location (City, CountryName, ContinentName)
