@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"> <!-- input form style -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+  <link rel="stylesheet" href="styles.css?v=5" />  <!-- general css style -->
+
+  <style>
+    /* Remove list style from nav tabs */
+    .nav-tabs {
+      list-style: none;
+      padding-left: 0;
+    }
+    .nav-tabs .nav-item {
+      list-style: none;
+    }
+    #wrapper {
+      padding-bottom: 50px;
+      min-height: 100vh;
+    }
+    /* Force form fields to stack vertically */
+    #manufacturerForm label,
+    #distributorForm label,
+    #retailerForm label {
+      display: block;
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+    #manufacturerForm input,
+    #manufacturerForm select,
+    #distributorForm input,
+    #distributorForm select,
+    #retailerForm input,
+    #retailerForm select {
+      margin-bottom: 0;
+    }
+  </style>
+
+  <title>Update Company Information</title>
+
+</head>
+
+<body>
+
+  <!-- Modular Navbar -->
+  <div id="navbar"></div>
+  <script>
+    fetch('navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+        // Highlight current page in navbar
+        const links = document.querySelectorAll('#navbar .nav-links a');
+        const currentPage = location.pathname.split('/').pop();
+        links.forEach(link => {
+          if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+          }
+        });
+        // Execute the navbar script
+        const scripts = document.getElementById('navbar').getElementsByTagName('script');
+        for (let script of scripts) {
+          eval(script.innerHTML);
+        }
+      })
+      .catch(err => console.error('Error loading navbar:', err));
+  </script>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+          <!-- Page Title --> 
+          <h3>Update Company Information</h3>
+
+          <!-- Tabs for different company types -->
+          <ul class="nav nav-tabs mt-3" id="companyTypeTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="manufacturer-tab" data-toggle="tab" href="#manufacturer" role="tab">Manufacturer</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="distributor-tab" data-toggle="tab" href="#distributor" role="tab">Distributor</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="retailer-tab" data-toggle="tab" href="#retailer" role="tab">Retailer</a>
+            </li>
+          </ul>
+
+          <div class="tab-content mt-3" id="companyTypeTabsContent">
+            <!-- Manufacturer Tab -->
+            <div class="tab-pane fade show active" id="manufacturer" role="tabpanel">
+              <div class="box shadow">
+                <form id="manufacturerForm">
+                  <label>Current Company Name:
+                    <input type="text" id="mfg_name" placeholder="Enter company name (required)" required>
+                  </label>
+                  
+                  <label>New Company Name:
+                    <input type="text" id="mfg_newName" placeholder="Leave blank to keep current">
+                  </label>
+                  
+                  <label>Tier:
+                    <select id="mfg_tier">
+                      <option value="">Leave blank to keep current</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </label>
+                  
+                  <label>Factory Capacity:
+                    <input type="number" id="mfg_capacity" placeholder="Leave blank to keep current">
+                  </label>
+                  
+                  <input type="submit" value="Update Manufacturer">
+                </form>
+                
+                <div id="mfg_errorMessage" class="mt-3" style="color: red; display: none;"></div>
+                <div id="mfg_result" class="result-message"></div>
+              </div>
+            </div>
+
+            <!-- Distributor Tab -->
+            <div class="tab-pane fade" id="distributor" role="tabpanel">
+              <div class="box shadow">
+                <form id="distributorForm">
+                  <label>Current Company Name:
+                    <input type="text" id="dist_name" placeholder="Enter company name (required)" required>
+                  </label>
+                  
+                  <label>New Company Name:
+                    <input type="text" id="dist_newName" placeholder="Leave blank to keep current">
+                  </label>
+                  
+                  <label>Tier:
+                    <select id="dist_tier">
+                      <option value="">Leave blank to keep current</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </label>
+                  
+                  <hr class="form-section-divider">
+                  
+                  <div class="section-title">Distributor Logistics</div>
+                  <div class="section-note">
+                    To update a logistics relationship for a distributor, provide both the original and new company names.
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label>Original From Company:
+                        <input type="text" id="dist_fromo" placeholder="Current from company">
+                      </label>
+                    </div>
+                    <div class="col-md-6">
+                      <label>New From Company:
+                        <input type="text" id="dist_from" placeholder="Updated from company">
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label>Original To Company:
+                        <input type="text" id="dist_too" placeholder="Current to company">
+                      </label>
+                    </div>
+                    <div class="col-md-6">
+                      <label>New To Company:
+                        <input type="text" id="dist_to" placeholder="Updated to company">
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <input type="submit" value="Update Distributor">
+                </form>
+                
+                <div id="dist_errorMessage" class="mt-3" style="color: red; display: none;"></div>
+                <div id="dist_result" class="result-message"></div>
+              </div>
+            </div>
+
+            <!-- Retailer Tab -->
+            <div class="tab-pane fade" id="retailer" role="tabpanel">
+              <div class="box shadow">
+                <form id="retailerForm">
+                  <label>Current Company Name:
+                    <input type="text" id="ret_name" placeholder="Enter company name (required)" required>
+                  </label>
+                  
+                  <label>New Company Name:
+                    <input type="text" id="ret_newName" placeholder="Leave blank to keep current">
+                  </label>
+                  
+                  <label>Tier:
+                    <select id="ret_tier">
+                      <option value="">Leave blank to keep current</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </label>
+                  
+                  <input type="submit" value="Update Retailer">
+                </form>
+                
+                <div id="ret_errorMessage" class="mt-3" style="color: red; display: none;"></div>
+                <div id="ret_result" class="result-message"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies for tab functionality -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+<script>
+// Fetch company list for validation
+let companyList = [];
+let companyTypeMap = {}; // Maps company name to its type (Manufacturer, Distributor, Retailer)
+
+fetch('company_info_output.php?q=2019-01-01|' + new Date().toISOString().split('T')[0] + '|')
+  .then(response => response.json())
+  .then(data => {
+    if (data["Company List All:"]) {
+      companyList = data["Company List All:"];
+      console.log('Loaded company list:', companyList.length, 'companies');
+      
+      // Fetch type information for each company
+      const promises = companyList.map(company => 
+        fetch('company_info_output.php?q=2019-01-01|' + new Date().toISOString().split('T')[0] + '|' + encodeURIComponent(company))
+          .then(res => res.json())
+          .then(companyData => {
+            if (companyData["Type"]) {
+              companyTypeMap[company] = companyData["Type"];
+            }
+          })
+          .catch(err => console.error('Error loading type for', company, ':', err))
+      );
+      
+      Promise.all(promises).then(() => {
+        console.log('Loaded company types for', Object.keys(companyTypeMap).length, 'companies');
+      });
+    }
+  })
+  .catch(err => {
+    console.error('Error loading company list:', err);
+  });
+
+// Manufacturer form
+document.getElementById('manufacturerForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    
+    const resultDiv = document.getElementById('mfg_result');
+    const errorDiv = document.getElementById('mfg_errorMessage');
+    
+    // Clear previous messages
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    // Validate current company name against database
+    const currentName = document.getElementById('mfg_name').value.trim();
+    if (companyList.length > 0 && !companyList.includes(currentName)) {
+        errorDiv.textContent = 'Company "' + currentName + '" not found in database. Please check the spelling and try again.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate company type matches this tab
+    if (companyTypeMap[currentName] && companyTypeMap[currentName] !== 'Manufacturer') {
+        errorDiv.textContent = 'Company "' + currentName + '" is a ' + companyTypeMap[currentName] + ', not a Manufacturer. Please use the correct tab.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate new company name is not already in database
+    const newName = document.getElementById('mfg_newName').value.trim();
+    if (newName && companyList.length > 0 && companyList.includes(newName)) {
+        errorDiv.textContent = 'Company "' + newName + '" already exists in database. Please choose a different name.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate factory capacity is non-negative
+    const capacity = document.getElementById('mfg_capacity').value.trim();
+    if (capacity !== '' && (isNaN(capacity) || parseFloat(capacity) < 0)) {
+        errorDiv.textContent = 'Factory capacity must be a non-negative number.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    resultDiv.className = 'loading';
+    resultDiv.style.display = 'block';
+    resultDiv.innerText = 'Updating manufacturer information...';
+    
+    const data = {};
+    const fieldMap = {
+        'mfg_name': 'name',
+        'mfg_newName': 'newName',
+        'mfg_tier': 'tier',
+        'mfg_capacity': 'capacity'
+    };
+    
+    Object.keys(fieldMap).forEach(id => {
+        const val = document.getElementById(id).value.trim();
+        if(val) data[fieldMap[id]] = val;
+    });
+    
+    fetch('updates.php?' + new URLSearchParams(data))
+        .then(res=>res.json())
+        .then(json=>{
+            resultDiv.className = 'success';
+            resultDiv.innerText = '✓ Manufacturer updated successfully!';
+            // Clear non-required fields after successful update
+            ['mfg_newName','mfg_tier','mfg_capacity'].forEach(id=>{
+                document.getElementById(id).value = '';
+            });
+            // Auto-hide success message after 5 seconds
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        })
+        .catch(err=>{
+            resultDiv.className = 'error';
+            resultDiv.innerText = '✗ Error updating manufacturer: ' + err;
+        });
+});
+
+// Distributor form
+document.getElementById('distributorForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    
+    const resultDiv = document.getElementById('dist_result');
+    const errorDiv = document.getElementById('dist_errorMessage');
+    
+    // Clear previous messages
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    // Validate current company name against database
+    const currentName = document.getElementById('dist_name').value.trim();
+    if (companyList.length > 0 && !companyList.includes(currentName)) {
+        errorDiv.textContent = 'Company "' + currentName + '" not found in database. Please check the spelling and try again.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate company type matches this tab
+    if (companyTypeMap[currentName] && companyTypeMap[currentName] !== 'Distributor') {
+        errorDiv.textContent = 'Company "' + currentName + '" is a ' + companyTypeMap[currentName] + ', not a Distributor. Please use the correct tab.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate new company name is not already in database
+    const newName = document.getElementById('dist_newName').value.trim();
+    if (newName && companyList.length > 0 && companyList.includes(newName)) {
+        errorDiv.textContent = 'Company "' + newName + '" already exists in database. Please choose a different name.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate to/from companies
+    const fromCompany = document.getElementById('dist_from').value.trim();
+    const toCompany = document.getElementById('dist_to').value.trim();
+    const fromOrig = document.getElementById('dist_fromo').value.trim();
+    const toOrig = document.getElementById('dist_too').value.trim();
+    
+    // Original and new companies can't be the same
+    if (fromOrig && fromCompany && fromOrig === fromCompany) {
+        errorDiv.textContent = 'Original "From" company and new "From" company cannot be the same.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (toOrig && toCompany && toOrig === toCompany) {
+        errorDiv.textContent = 'Original "To" company and new "To" company cannot be the same.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // To and from companies can't be the same
+    if (fromCompany && toCompany && fromCompany === toCompany) {
+        errorDiv.textContent = '"From" company and "To" company cannot be the same.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (fromOrig && toOrig && fromOrig === toOrig) {
+        errorDiv.textContent = 'Original "From" company and original "To" company cannot be the same.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // None can be the same as the current company
+    if (fromCompany && fromCompany === currentName) {
+        errorDiv.textContent = '"From" company cannot be the same as the current company.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (toCompany && toCompany === currentName) {
+        errorDiv.textContent = '"To" company cannot be the same as the current company.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (fromOrig && fromOrig === currentName) {
+        errorDiv.textContent = 'Original "From" company cannot be the same as the current company.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (toOrig && toOrig === currentName) {
+        errorDiv.textContent = 'Original "To" company cannot be the same as the current company.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    resultDiv.className = 'loading';
+    resultDiv.style.display = 'block';
+    resultDiv.innerText = 'Updating distributor information...';
+    
+    const data = {};
+    const fieldMap = {
+        'dist_name': 'name',
+        'dist_newName': 'newName',
+        'dist_tier': 'tier',
+        'dist_from': 'from',
+        'dist_to': 'to',
+        'dist_fromo': 'fromo',
+        'dist_too': 'too'
+    };
+    
+    Object.keys(fieldMap).forEach(id => {
+        const val = document.getElementById(id).value.trim();
+        if(val) data[fieldMap[id]] = val;
+    });
+    
+    fetch('updates.php?' + new URLSearchParams(data))
+        .then(res=>res.json())
+        .then(json=>{
+            resultDiv.className = 'success';
+            resultDiv.innerText = '✓ Distributor updated successfully!';
+            // Clear non-required fields after successful update
+            ['dist_newName','dist_tier','dist_from','dist_to','dist_fromo','dist_too'].forEach(id=>{
+                document.getElementById(id).value = '';
+            });
+            // Auto-hide success message after 5 seconds
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        })
+        .catch(err=>{
+            resultDiv.className = 'error';
+            resultDiv.innerText = '✗ Error updating distributor: ' + err;
+        });
+});
+
+// Retailer form
+document.getElementById('retailerForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    
+    const resultDiv = document.getElementById('ret_result');
+    const errorDiv = document.getElementById('ret_errorMessage');
+    
+    // Clear previous messages
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    // Validate current company name against database
+    const currentName = document.getElementById('ret_name').value.trim();
+    if (companyList.length > 0 && !companyList.includes(currentName)) {
+        errorDiv.textContent = 'Company "' + currentName + '" not found in database. Please check the spelling and try again.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate company type matches this tab
+    if (companyTypeMap[currentName] && companyTypeMap[currentName] !== 'Retailer') {
+        errorDiv.textContent = 'Company "' + currentName + '" is a ' + companyTypeMap[currentName] + ', not a Retailer. Please use the correct tab.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate new company name is not already in database
+    const newName = document.getElementById('ret_newName').value.trim();
+    if (newName && companyList.length > 0 && companyList.includes(newName)) {
+        errorDiv.textContent = 'Company "' + newName + '" already exists in database. Please choose a different name.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    resultDiv.className = 'loading';
+    resultDiv.style.display = 'block';
+    resultDiv.innerText = 'Updating retailer information...';
+    
+    const data = {};
+    const fieldMap = {
+        'ret_name': 'name',
+        'ret_newName': 'newName',
+        'ret_tier': 'tier'
+    };
+    
+    Object.keys(fieldMap).forEach(id => {
+        const val = document.getElementById(id).value.trim();
+        if(val) data[fieldMap[id]] = val;
+    });
+    
+    fetch('updates.php?' + new URLSearchParams(data))
+        .then(res=>res.json())
+        .then(json=>{
+            resultDiv.className = 'success';
+            resultDiv.innerText = '✓ Retailer updated successfully!';
+            // Clear non-required fields after successful update
+            ['ret_newName','ret_tier'].forEach(id=>{
+                document.getElementById(id).value = '';
+            });
+            // Auto-hide success message after 5 seconds
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        })
+        .catch(err=>{
+            resultDiv.className = 'error';
+            resultDiv.innerText = '✗ Error updating retailer: ' + err;
+        });
+});
+</script>
+
+</body>
+</html>

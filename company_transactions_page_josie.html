@@ -1,0 +1,351 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"> <!-- input form style -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+  <link rel="stylesheet" href="styles.css?v=3" />  <!-- general css style -->
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  
+  <style>
+    /* Remove list style from nav tabs */
+    .nav-tabs {
+      list-style: none;
+      padding-left: 0;
+    }
+    .nav-tabs .nav-item {
+      list-style: none;
+    }
+    /* Add padding at bottom to create buffer */
+    #wrapper {
+      padding-bottom: 50px;
+    }
+  </style>
+
+  <title>Company Transactions</title>
+
+</head>
+
+<body>
+
+  <!-- Vertical Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <img src="logo.png" alt="INSERT LOGO HERE" />
+    </div>
+    <ul class="nav-links">
+      <li><a href="company_info_page_josie_v5.html">Company Information</a></li>
+      <li><a href="disruptions_events_josie.html">Disruption Events</a></li>
+      <li><a href="company_transactions_page_josie.html" class="active">Company Transactions</a></li>
+      <li><a href="distributor_transactions_page_josie.html">Distributor Transactions</a></li>
+      <li><a href="login_page_josie.html" style="color: #ff4560;">Log Out</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+     <!-- Page Title --> 
+    <h3>Company Transactions</h3>
+
+    <!-- Search Form -->
+    <div class="box shadow">
+      <form id="searchForm" onsubmit="event.preventDefault(); searchTransactions();">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+          <select id="searchType" name="searchType" required onchange="updateSearchFields()">
+            <option value="">Select search type</option>
+            <option value="company">Company</option>
+            <option value="continent">Continent</option>
+            <option value="country">Country</option>
+            <option value="city">City</option>
+          </select>
+          
+          <div id="searchFields"></div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+            <input type="date" id="startDate" name="startDate" placeholder="Enter starting date">
+            <input type="date" id="endDate" name="endDate" placeholder="Enter ending date">
+            <input type="submit" name="submit-btn" value="Search">
+          </div>
+        </div>
+        <div id="errorMessage" class="mt-3" style="color: red; display: none;"></div>
+      </form>
+    </div>
+
+    <!-- Results Container -->
+    <div id="resultsContainer" class="mt-4" style="display: none;">
+      <h5>Transaction Results</h5>
+      
+      <!-- Tabs for different views -->
+      <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="leaving-tab" data-toggle="tab" href="#leaving" role="tab">Leaving</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="arriving-tab" data-toggle="tab" href="#arriving" role="tab">Arriving</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="adjustments-tab" data-toggle="tab" href="#adjustments" role="tab">Adjustments</a>
+        </li>
+      </ul>
+
+        <div class="tab-content mt-3" id="transactionTabsContent">
+          <div class="tab-pane fade show active" id="leaving" role="tabpanel">
+            <div class="box shadow">
+              <div id="leavingContent">
+                <!-- Leaving transactions will be displayed here -->
+                <p>Leaving transactions content coming soon</p>
+              </div>
+            </div>
+             <div class="box shadow mt-3" id="leavingExtraBox">
+               <!-- Extra box for Leaving tab -->
+             </div>
+          </div>
+          <div class="tab-pane fade" id="arriving" role="tabpanel">
+            <div class="box shadow">
+              <div id="arrivingContent">
+                <!-- Arriving transactions will be displayed here -->
+                <p>Arriving transactions content coming soon</p>
+              </div>
+            </div>
+             <div class="box shadow mt-3" id="arrivingExtraBox">
+               <!-- Extra box for Arriving tab -->
+             </div>
+          </div>
+          <div class="tab-pane fade" id="adjustments" role="tabpanel">
+            <div class="box shadow">
+              <div id="adjustmentsContent">
+                <!-- Adjustments will be displayed here -->
+                <p>Adjustments content coming soon</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="leaving" role="tabpanel">
+          <div class="box shadow">
+            <div id="leavingContent">
+              <!-- Leaving transactions will be displayed here -->
+              <p>Leaving transactions content coming soon</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="arriving" role="tabpanel">
+          <div class="box shadow">
+            <div id="arrivingContent">
+              <!-- Arriving transactions will be displayed here -->
+              <p>Arriving transactions content coming soon</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="adjustments" role="tabpanel">
+          <div class="box shadow">
+            <div id="adjustmentsContent">
+              <!-- Adjustments will be displayed here -->
+              <p>Adjustments content coming soon</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div id="temp"></div>
+
+  <script>
+
+function showCustomer() {
+      //https://code-boxx.com/javascript-fetch-get-query-params/
+      var feilds = ["company", "city", "country", "continent", "date1", "date2"];
+      var inputs = {};
+      for (var key = 0; key < feilds.length; key++) {
+        if (document.getElementById(feilds[key])) {
+          if (document.getElementById(feilds[key]).value != "") {
+            inputs[feilds[key]] = document.getElementById(feilds[key]).value;
+          }
+        }
+      }
+      console.log(inputs);
+      event.preventDefault();
+      var xhttp;
+      xhttp = new XMLHttpRequest();
+      xhttp.onload = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+        }
+      };
+      //https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
+      //https://attacomsian.com/blog/javascript-convert-object-to-query-string-parameters
+      var url = "disruption_events.php?" + new URLSearchParams(inputs).toString();
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    
+
+    function displayResults(data) {
+      const resultsContainer = document.getElementById('resultsContainer');
+      const leavingContent = document.getElementById('leavingContent');
+      const arrivingContent = document.getElementById('arrivingContent');
+      const leavingExtraBox = document.getElementById('leavingExtraBox');
+      const arrivingExtraBox = document.getElementById('arrivingExtraBox');
+      
+      // Calculate totals (using correct keys from PHP)
+      const leavingCount = data["Leaving Date"] ? data["Leaving Date"].length : 0;
+      const arrivingCount = data["Arriving Date"] ? data["Arriving Date"].length : 0;
+      const adjustmentCount = data["Adjustment Date"] ? data["Adjustment Date"].length : 0;
+      const totalTransactions = leavingCount + arrivingCount + adjustmentCount;
+      
+      // Leaving Tab
+      if (data["Leaving Date"] && data["Leaving Date"].length > 0) {
+        // Bar chart for Leaving tab (use same keys as table)
+        const leavingProducts = data["Leaving Product"] || [];
+        const leavingQuantities = data["Leaving Quantity"] || [];
+        const leavingTotals = {};
+        for (let i = 0; i < leavingProducts.length; i++) {
+          const prod = leavingProducts[i];
+          const qty = parseFloat(leavingQuantities[i]) || 0;
+          leavingTotals[prod] = (leavingTotals[prod] || 0) + qty;
+        }
+        const leavingLabels = Object.keys(leavingTotals);
+        const leavingData = leavingLabels.map(k => leavingTotals[k]);
+        let barBox = '<div class="box shadow mb-3"><canvas id="leavingBarChart"></canvas></div>';
+        let tableBox = '<div class="box shadow"><h6>Transactions Leaving</h6>';
+        tableBox += '<div style="max-height: 200px; overflow-y: auto;"><table class="table table-striped"><thead><tr><th>Date</th><th>Company</th><th>Product</th><th>Quantity</th></tr></thead><tbody>';
+        for (let i = 0; i < data["Leaving Date"].length; i++) {
+          tableBox += `<tr>
+            <td>${data["Leaving Date"][i]}</td>
+            <td>${data["Leaving Company"][i]}</td>
+            <td>${data["Leaving Product"][i]}</td>
+            <td>${data["Leaving Quantity"][i]}</td>
+          </tr>`;
+        }
+        tableBox += '</tbody></table></div></div>';
+        leavingContent.innerHTML = barBox + tableBox;
+        if (leavingLabels.length > 0) {
+          setTimeout(function() {
+            new Chart(document.getElementById('leavingBarChart').getContext('2d'), {
+              type: 'bar',
+              data: {
+                labels: leavingLabels,
+                datasets: [{
+                  label: 'Total Quantity',
+                  data: leavingData,
+                  backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { display: false }, title: { display: true, text: 'Total Quantity by Product (Leaving)' } },
+                scales: { x: { title: { display: true, text: 'Product' } }, y: { title: { display: true, text: 'Total Quantity' }, beginAtZero: true } }
+              }
+            });
+          }, 100);
+        } else {
+          document.getElementById('leavingBarChart').parentElement.innerHTML += '<p style="text-align:center; color:#6c757d;">No data for bar chart.</p>';
+        }
+      } else {
+        leavingContent.innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">No leaving transactions found.</p>';
+      }
+      
+      // Arriving Tab
+      if (data["Arriving Date"] && data["Arriving Date"].length > 0) {
+        // Bar chart for Arriving tab (use same keys as table)
+        const arrivingProducts = data["Arriving Product"] || [];
+        const arrivingQuantities = data["Arriving Quantity"] || [];
+        const arrivingTotals = {};
+        for (let i = 0; i < arrivingProducts.length; i++) {
+          const prod = arrivingProducts[i];
+          const qty = parseFloat(arrivingQuantities[i]) || 0;
+          arrivingTotals[prod] = (arrivingTotals[prod] || 0) + qty;
+        }
+        const arrivingLabels = Object.keys(arrivingTotals);
+        const arrivingData = arrivingLabels.map(k => arrivingTotals[k]);
+        let barBox = '<div class="box shadow mb-3"><canvas id="arrivingBarChart"></canvas></div>';
+        let tableBox = '<div class="box shadow"><h6>Transactions Arriving</h6>';
+        tableBox += '<div style="max-height: 200px; overflow-y: auto;"><table class="table table-striped"><thead><tr><th>Date</th><th>Company</th><th>Product</th><th>Quantity</th></tr></thead><tbody>';
+        for (let i = 0; i < data["Arriving Date"].length; i++) {
+          tableBox += `<tr>
+            <td>${data["Arriving Date"][i]}</td>
+            <td>${data["Arriving Company"][i]}</td>
+            <td>${data["Arriving Product"][i]}</td>
+            <td>${data["Arriving Quantity"][i]}</td>
+          </tr>`;
+        }
+        tableBox += '</tbody></table></div></div>';
+        arrivingContent.innerHTML = barBox + tableBox;
+        if (arrivingLabels.length > 0) {
+          setTimeout(function() {
+            new Chart(document.getElementById('arrivingBarChart').getContext('2d'), {
+              type: 'bar',
+              data: {
+                labels: arrivingLabels,
+                datasets: [{
+                  label: 'Total Quantity',
+                  data: arrivingData,
+                  backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { display: false }, title: { display: true, text: 'Total Quantity by Product (Arriving)' } },
+                scales: { x: { title: { display: true, text: 'Product' } }, y: { title: { display: true, text: 'Total Quantity' }, beginAtZero: true } }
+              }
+            });
+          }, 100);
+        } else {
+          document.getElementById('arrivingBarChart').parentElement.innerHTML += '<p style="text-align:center; color:#6c757d;">No data for bar chart.</p>';
+        }
+      } else {
+        arrivingContent.innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">No arriving transactions found.</p>';
+      }
+      
+      // Adjustments Tab
+      const adjustmentsContent = document.getElementById('adjustmentsContent');
+      if (data["Adjustment Date"] && data["Adjustment Date"].length > 0) {
+        let adjustmentsHTML = '<h6>Adjustments</h6>';
+        adjustmentsHTML += '<div style="max-height: 400px; overflow-y: auto;"><table class="table table-striped"><thead><tr><th>Date</th><th>Company</th><th>Product</th><th>Quantity</th><th>Reason</th></tr></thead><tbody>';
+        for (let i = 0; i < data["Adjustment Date"].length; i++) {
+          adjustmentsHTML += `<tr>
+            <td>${data["Adjustment Date"][i]}</td>
+            <td>${data["Adjustment Company"][i]}</td>
+            <td>${data["Adjustment Product"][i]}</td>
+            <td>${data["Adjustment Quantity"][i]}</td>
+            <td>${data["Adjustment Reason"][i]}</td>
+          </tr>`;
+        }
+        adjustmentsHTML += '</tbody></table></div>';
+        adjustmentsContent.innerHTML = adjustmentsHTML;
+      } else {
+        adjustmentsContent.innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">No adjustments found.</p>';
+      }
+      
+      resultsContainer.style.display = 'block';
+    }
+  }
+  
+  </script>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies for tab functionality -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
