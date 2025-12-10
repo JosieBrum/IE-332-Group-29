@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="chart-utils.js?v=7"></script>
+  
+  <title>Senior Manager Dashboard</title>
+</head>
+
+<body class="senior-dashboard">
+
+  <!-- Top Navbar -->
+  <nav class="top-navbar">
+    <div class="navbar-logo">
+      <img src="logo.png" alt="INSERT LOGO HERE" />
+    </div>
+    <div class="navbar-actions">
+      <a href="ajax_senoir_manager.html" class="nav-link">Dashboard</a>
+      <a href="ajax_addcompany.html" class="nav-link">Add a Company</a>
+      <a href="login_page_josie.html" class="nav-link logout-link">Log Out</a>
+    </div>
+  </nav>
+
+  <!-- Sidebar with Search Filters -->
+  <div class="sidebar">
+    <div style="padding: 10px 10px 20px 10px;">
+      <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; margin-top: 5px;">Advanced Search</h4>
+      
+      <form id="searchForm" onsubmit="showCustomer(event); return false;">
+        
+        <!-- Date Range Filters -->
+        <div class="filter-group-title">Date Range</div>
+        <label for="date1">Start Date</label>
+        <input type="date" name="date1" id="date1">
+        
+        <label for="date2">End Date</label>
+        <input type="date" name="date2" id="date2">
+        
+        <!-- Company Filters -->
+        <div class="filter-group-title">Company Information</div>
+        <label for="companyName">Company Name</label>
+        <input type="text" name="companyName" id="companyName" placeholder="Enter company name">
+        
+        <label for="type">Company Type</label>
+        <select name="type" id="type">
+          <option value="">Select type</option>
+          <option value="Manufacturer">Manufacturer</option>
+          <option value="Distributor">Distributor</option>
+          <option value="Retailer">Retailer</option>
+        </select>
+        
+        <label for="tier">Tier</label>
+        <select name="tier" id="tier">
+          <option value="">Select tier</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+        
+        <!-- Geographic Filters -->
+        <div class="filter-group-title">Geographic Filters</div>
+        <label for="regional">Region Type</label>
+        <select name="regional" id="regional" onchange="updateRegionFields()">
+          <option value="">Select region type</option>
+          <option value="Continent">Continent</option>
+          <option value="Country">Country</option>
+        </select>
+        
+        <div id="continentField" style="display: none;">
+          <label for="continent">Continent</label>
+          <select name="continent" id="continent">
+            <option value="">Loading continents...</option>
+          </select>
+        </div>
+        
+        <div id="countryField" style="display: none;">
+          <label for="country">Country</label>
+          <input type="text" name="country" id="country" placeholder="Enter country">
+        </div>
+        
+        <!-- Event Filters -->
+        <div class="filter-group-title">Event Information</div>
+        <label for="categoryName">Event Type</label>
+        <select name="categoryName" id="categoryName">
+          <option value="">Loading event types...</option>
+        </select>
+        
+        <label for="eventDate">Event Date</label>
+        <input type="date" name="eventDate" id="eventDate">
+        
+        <!-- Action Buttons -->
+        <input type="submit" value="Search" style="margin-top: 10px;">
+        <button type="button" class="btn-reset-filters" onclick="resetForm()">Reset Filters</button>
+        
+        <!-- Error Message Display -->
+        <div id="errorMessage" style="color: #f4516c; background-color: #ffe6ea; padding: 10px; border-radius: 4px; margin-top: 10px; display: none; font-size: 13px;"></div>
+        
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+          <div class="row">
+            <!-- Full Width Results Area -->
+            <div class="col-md-12">
+              
+              <!-- Search Placeholder -->
+              <div class="search-placeholder" id="searchPlaceholder">
+                <h4>Search the database...</h4>
+                <p>Use the filters on the left to search and view results</p>
+              </div>
+              
+              <div class="tabs-and-content" id="tabsAndContent">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" id="financial-health-tab" data-toggle="tab" href="#financial-health" role="tab">Financial Health</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="regional-tab" data-toggle="tab" href="#regional-disruption" role="tab">Regional Disruption</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="criticality-tab" data-toggle="tab" href="#criticality" role="tab">Criticality</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="frequency-tab" data-toggle="tab" href="#frequency" role="tab">Frequency</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="delays-tab" data-toggle="tab" href="#delays" role="tab">Delays</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="financials-tab" data-toggle="tab" href="#financials" role="tab">Company Financials</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="distributors-tab" data-toggle="tab" href="#distributors" role="tab">Top Distributors</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="event-impact-tab" data-toggle="tab" href="#event-impact" role="tab">Event Impact</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="company-events-tab" data-toggle="tab" href="#company-events" role="tab">Company Events</a>
+                  </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content mt-3" id="dashboardTabsContent">
+                
+                <!-- Financial Health Tab -->
+                <div class="tab-pane fade show active" id="financial-health" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Financial Health</h4>
+                    <div id="financial-health-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Regional Disruption Tab -->
+                <div class="tab-pane fade" id="regional-disruption" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Regional Disruption</h4>
+                    <div id="regional-disruption-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Criticality Tab -->
+                <div class="tab-pane fade" id="criticality" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Criticality</h4>
+                    <div id="criticality-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Disruption Frequency Tab -->
+                <div class="tab-pane fade" id="frequency" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Disruption Frequency</h4>
+                    <div id="frequency-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Company Financials Tab -->
+                <div class="tab-pane fade" id="financials" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Company Financials</h4>
+                    <div id="financials-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Top Distributors Tab -->
+                <div class="tab-pane fade" id="distributors" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Top Distributors by Shipment Volume</h4>
+                    <div id="distributors-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Delays Tab -->
+                <div class="tab-pane fade" id="delays" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Distributors Sorted by Average Delay</h4>
+                    <div id="delays-content">
+                      <div class="no-results">Use the search filters on the left to find results</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Event Impact Tab -->
+                <div class="tab-pane fade" id="event-impact" role="tabpanel">
+                  <div class="results-box">
+                    <h4>Companies Affected by Specific Disruption Event</h4>
+                    <div id="event-impact-content">
+                      <div class="no-results">Use the search filters on the left to find results. Note: Event Type and Event Date must be filled to view this data.</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Company Events Tab -->
+                <div class="tab-pane fade" id="company-events" role="tabpanel">
+                  <div class="results-box">
+                    <h4>All Disruption Events for Specific Company</h4>
+                    <div id="company-events-content">
+                      <div class="no-results">Use the search filters on the left to find results. Note: Company Name must be filled to view this data.</div>
+                    </div>
+                  </div>
+                </div>
+                
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies for tab functionality -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+  <script>
+    // Country to ISO3 mapping for heatmap
+    const countryToISO3 = {
+      "Algeria":"DZA","Angola":"AGO","Benin":"BEN","Botswana":"BWA","Burkina Faso":"BFA",
+      "Burundi":"BDI","Cabo Verde":"CPV","Cameroon":"CMR","Central African Republic":"CAF","Chad":"TCD",
+      "Comoros":"COM","Congo":"COG","Democratic Republic of the Congo":"COD","Côte d'Ivoire":"CIV","Djibouti":"DJI",
+      "Egypt":"EGY","Equatorial Guinea":"GNQ","Eritrea":"ERI","Eswatini":"SWZ","Ethiopia":"ETH",
+      "Gabon":"GAB","Gambia":"GMB","Ghana":"GHA","Guinea":"GIN","Guinea-Bissau":"GNB",
+      "Kenya":"KEN","Lesotho":"LSO","Liberia":"LBR","Libya":"LBY","Madagascar":"MDG",
+      "Malawi":"MWI","Mali":"MLI","Mauritania":"MRT","Mauritius":"MUS","Mayotte":"MYT",
+      "Morocco":"MAR","Mozambique":"MOZ","Namibia":"NAM","Niger":"NER","Nigeria":"NGA",
+      "Réunion":"REU","Rwanda":"RWA","Saint Helena":"SHN","Sao Tome and Principe":"STP","Senegal":"SEN",
+      "Seychelles":"SYC","Sierra Leone":"SLE","Somalia":"SOM","South Africa":"ZAF","South Sudan":"SSD",
+      "Sudan":"SDN","Tanzania":"TZA","Togo":"TGO","Tunisia":"TUN","Uganda":"UGA",
+      "Western Sahara":"ESH","Zambia":"ZMB","Zimbabwe":"ZWE",
+      "Åland Islands":"ALA","Albania":"ALB","Andorra":"AND","Austria":"AUT","Belarus":"BLR",
+      "Belgium":"BEL","Bosnia and Herzegovina":"BIH","Bulgaria":"BGR","Croatia":"HRV","Czechia":"CZE",
+      "Denmark":"DNK","Estonia":"EST","Faroe Islands":"FRO","Finland":"FIN","France":"FRA",
+      "Germany":"DEU","Gibraltar":"GIB","Greece":"GRC","Guernsey":"GGY","Holy See":"VAT",
+      "Hungary":"HUN","Iceland":"ISL","Ireland":"IRL","Isle of Man":"IMN","Italy":"ITA",
+      "Jersey":"JEY","Latvia":"LVA","Liechtenstein":"LIE","Lithuania":"LTU","Luxembourg":"LUX",
+      "Malta":"MLT","Moldova":"MDA","Monaco":"MCO","Montenegro":"MNE","Netherlands":"NLD",
+      "North Macedonia":"MKD","Norway":"NOR","Poland":"POL","Portugal":"PRT","Romania":"ROU",
+      "Russia":"RUS","San Marino":"SMR","Serbia":"SRB","Slovakia":"SVK","Slovenia":"SVN",
+      "Spain":"ESP","Svalbard and Jan Mayen":"SJM","Sweden":"SWE","Switzerland":"CHE","Ukraine":"UKR",
+      "United Kingdom":"GBR",
+      "Afghanistan":"AFG","Armenia":"ARM","Azerbaijan":"AZE","Bahrain":"BHR","Bangladesh":"BGD",
+      "Bhutan":"BTN","Brunei":"BRN","Cambodia":"KHM","China":"CHN","Cyprus":"CYP",
+      "Georgia":"GEO","Hong Kong":"HKG","India":"IND","Indonesia":"IDN","Iran":"IRN",
+      "Iraq":"IRQ","Israel":"ISR","Japan":"JPN","Jordan":"JOR","Kazakhstan":"KAZ",
+      "North Korea":"PRK","South Korea":"KOR","Kuwait":"KWT","Kyrgyzstan":"KGZ","Laos":"LAO",
+      "Lebanon":"LBN","Macau":"MAC","Malaysia":"MYS","Maldives":"MDV","Mongolia":"MNG",
+      "Myanmar":"MMR","Nepal":"NPL","Oman":"OMN","Pakistan":"PAK","Palestine":"PSE",
+      "Philippines":"PHL","Qatar":"QAT","Saudi Arabia":"SAU","Singapore":"SGP","Sri Lanka":"LKA",
+      "Syria":"SYR","Tajikistan":"TJK","Thailand":"THA","Timor-Leste":"TLS","Turkey":"TUR",
+      "Turkmenistan":"TKM","United Arab Emirates":"ARE","Uzbekistan":"UZB","Vietnam":"VNM","Yemen":"YEM",
+      "Anguilla":"AIA","Antigua and Barbuda":"ATG","Aruba":"ABW","Bahamas":"BHS","Barbados":"BRB",
+      "Belize":"BLZ","Bermuda":"BMU","Bonaire, Sint Eustatius and Saba":"BES","Canada":"CAN","Cayman Islands":"CYM",
+      "Costa Rica":"CRI","Cuba":"CUB","Curaçao":"CUW","Dominica":"DMA","Dominican Republic":"DOM",
+      "El Salvador":"SLV","Greenland":"GRL","Grenada":"GRD","Guadeloupe":"GLP","Guatemala":"GTM",
+      "Haiti":"HTI","Honduras":"HND","Jamaica":"JAM","Martinique":"MTQ","Mexico":"MEX",
+      "Montserrat":"MSR","Nicaragua":"NIC","Panama":"PAN","Puerto Rico":"PRI","Saint Barthélemy":"BLM",
+      "Saint Kitts and Nevis":"KNA","Saint Lucia":"LCA","Saint Martin":"MAF","Saint Pierre and Miquelon":"SPM","Saint Vincent and the Grenadines":"VCT",
+      "Sint Maarten":"SXM","Trinidad and Tobago":"TTO","Turks and Caicos Islands":"TCA","United States":"USA","British Virgin Islands":"VGB","U.S. Virgin Islands":"VIR",
+      "Argentina":"ARG","Bolivia":"BOL","Bouvet Island":"BVT","Brazil":"BRA","Chile":"CHL",
+      "Colombia":"COL","Ecuador":"ECU","Falkland Islands":"FLK","French Guiana":"GUF","Guyana":"GUY",
+      "Paraguay":"PRY","Peru":"PER","South Georgia and the South Sandwich Islands":"SGS","Suriname":"SUR","Uruguay":"URY","Venezuela":"VEN",
+      "American Samoa":"ASM","Australia":"AUS","Christmas Island":"CXR","Cocos (Keeling) Islands":"CCK","Cook Islands":"COK",
+      "Fiji":"FJI","French Polynesia":"PYF","Guam":"GUM","Heard Island and McDonald Islands":"HMD","Kiribati":"KIR",
+      "Marshall Islands":"MHL","Micronesia":"FSM","Nauru":"NRU","New Caledonia":"NCL","New Zealand":"NZL",
+      "Niue":"NIU","Norfolk Island":"NFK","Northern Mariana Islands":"MNP","Palau":"PLW","Papua New Guinea":"PNG",
+      "Pitcairn Islands":"PCN","Samoa":"WSM","Solomon Islands":"SLB","Tokelau":"TKL","Tonga":"TON",
+      "Tuvalu":"TUV","U.S. Minor Outlying Islands":"UMI","Vanuatu":"VUT","Wallis and Futuna":"WLF"
+    };
+
+    // Continent to ISO-3 country lists
+    const continentCountries = {
+      "Africa": [
+        "DZA", "AGO", "BEN", "BWA", "IOT", "BFA", "BDI", "CPV", "CMR", "CAF",
+        "TCD", "COM", "COG", "COD", "CIV", "DJI", "EGY", "GNQ", "ERI", "SWZ",
+        "ETH", "ATF", "GAB", "GMB", "GHA", "GIN", "GNB", "KEN", "LSO", "LBR",
+        "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MYT", "MAR", "MOZ", "NAM",
+        "NER", "NGA", "REU", "RWA", "SHN", "STP", "SEN", "SYC", "SLE", "SOM",
+        "ZAF", "SSD", "SDN", "TZA", "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE"],
+      "Europe": [
+        "ALA", "ALB", "AND", "AUT", "BLR", "BEL", "BIH", "BGR", "HRV", "CZE",
+        "DNK", "EST", "FRO", "FIN", "FRA", "DEU", "GIB", "GRC", "GGY", "VAT",
+        "HUN", "ISL", "IRL", "IMN", "ITA", "JEY", "LVA", "LIE", "LTU", "LUX",
+        "MLT", "MDA", "MCO", "MNE", "NLD", "MKD", "NOR", "POL", "PRT", "ROU",
+        "RUS", "SMR", "SRB", "SVK", "SVN", "ESP", "SJM", "SWE", "CHE", "UKR",
+        "GBR"],
+      "Asia": [
+        "AFG", "ARM", "AZE", "BHR", "BGD", "BTN", "BRN", "KHM", "CHN", "CYP",
+        "GEO", "HKG", "IND", "IDN", "IRN", "IRQ", "ISR", "JPN", "JOR", "KAZ",
+        "PRK", "KOR", "KWT", "KGZ", "LAO", "LBN", "MAC", "MYS", "MDV", "MNG",
+        "MMR", "NPL", "OMN", "PAK", "PSE", "PHL", "QAT", "SAU", "SGP", "LKA",
+        "SYR", "TJK", "THA", "TLS", "TUR", "TKM", "ARE", "UZB", "VNM", "YEM"],
+      "North America": [
+        "AIA", "ATG", "ABW", "BHS", "BRB", "BLZ", "BMU", "BES", "CAN", "CYM",
+        "CRI", "CUB", "CUW", "DMA", "DOM", "SLV", "GRL", "GRD", "GLP", "GTM",
+        "HTI", "HND", "JAM", "MTQ", "MEX", "MSR", "NIC", "PAN", "PRI", "BLM",
+        "KNA", "LCA", "MAF", "SPM", "VCT", "SXM", "TTO", "TCA", "USA", "VGB",
+        "VIR"],
+      "South America": [
+        "ARG", "BOL", "BVT", "BRA", "CHL", "COL", "ECU", "FLK", "GUF", "GUY",
+        "PRY", "PER", "SGS", "SUR", "URY", "VEN"],
+      "Oceania": [
+        "ASM", "AUS", "CXR", "CCK", "COK", "FJI", "PYF", "GUM", "HMD", "KIR",
+        "MHL", "FSM", "NRU", "NCL", "NZL", "NIU", "NFK", "MNP", "PLW", "PNG",
+        "PCN", "WSM", "SLB", "TKL", "TON", "TUV", "UMI", "VUT", "WLF"]
+    };
+    
+    // Cache for validation lists
+    let companyList = [];
+    let countryList = [];
+    let continentList = [];
+    let continentListLoaded = false;
+    let disruptionCategoryList = [];
+    
+    // Function to load continent list for dropdown
+    function loadContinentDropdown() {
+      if (continentListLoaded && continentList.length > 0) {
+        populateContinentDropdown();
+        return;
+      }
+      
+      fetch('company_transactions_output.php?continent=&date1=2019-01-01&date2=2019-01-02')
+        .then(response => response.json())
+        .then(data => {
+          if (data["Continent Name List All: "]) {
+            continentList = [...new Set(data["Continent Name List All: "])].sort();
+            console.log('Loaded continents for dropdown:', continentList.length);
+            continentListLoaded = true;
+            populateContinentDropdown();
+          } else {
+            document.getElementById('continent').innerHTML = '<option value="">No continents found</option>';
+          }
+        })
+        .catch(err => {
+          console.error('Error loading continent list:', err);
+          document.getElementById('continent').innerHTML = '<option value="">Error loading continents</option>';
+        });
+    }
+    
+    function populateContinentDropdown() {
+      let options = '<option value="">Select continent</option>';
+      continentList.forEach(continent => {
+        options += `<option value="${continent}">${continent}</option>`;
+      });
+      document.getElementById('continent').innerHTML = options;
+    }
+    
+    // Function to update region fields visibility
+    function updateRegionFields() {
+      const regionType = document.getElementById('regional').value;
+      const continentField = document.getElementById('continentField');
+      const countryField = document.getElementById('countryField');
+      
+      if (regionType === 'Continent') {
+        continentField.style.display = 'block';
+        countryField.style.display = 'none';
+        loadContinentDropdown();
+      } else if (regionType === 'Country') {
+        continentField.style.display = 'none';
+        countryField.style.display = 'block';
+      } else {
+        continentField.style.display = 'none';
+        countryField.style.display = 'none';
+      }
+    }
+    
+    // Load validation data on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      // Set default date values
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+      
+      document.getElementById("date2").value = todayStr;
+      document.getElementById("date1").value = '2019-01-01';
+      
+      // Fetch company, country, continent, and disruption event lists for validation
+      
+      // Fetch company list - use company parameter to trigger company list
+      fetch('disruption_events.php?date1=2019-01-01&date2=' + todayStr + '&company=')
+        .then(response => response.json())
+        .then(data => {
+          // Extract company names
+          if (data["Company Name List All: "]) {
+            companyList = data["Company Name List All: "];
+            console.log('Company list loaded:', companyList.length + ' companies');
+          }
+        })
+        .catch(err => {
+          console.error('Error loading company data:', err);
+        });
+      
+      // Fetch country list - use country parameter to trigger country list
+      fetch('disruption_events.php?date1=2019-01-01&date2=' + todayStr + '&country=')
+        .then(response => response.json())
+        .then(data => {
+          // Extract countries
+          if (data["Country Name List All: "]) {
+            countryList = data["Country Name List All: "];
+            console.log('Country list loaded:', countryList.length + ' countries');
+          }
+        })
+        .catch(err => {
+          console.error('Error loading country data:', err);
+        });
+      
+      // Fetch from company_info_output.php for disruption categories
+      fetch('company_info_output.php?q=2019-01-01|' + todayStr + '|Haynes-Long')
+        .then(response => response.json())
+        .then(data => {
+          // Extract disruption categories
+          if (data["Disruption Category List"]) {
+            // Get unique categories
+            disruptionCategoryList = [...new Set(data["Disruption Category List"])].sort();
+            console.log('Disruption categories loaded:', disruptionCategoryList.length + ' categories');
+            
+            // Populate event type dropdown
+            let options = '<option value="">Select event type</option>';
+            disruptionCategoryList.forEach(category => {
+              options += `<option value="${category}">${category}</option>`;
+            });
+            document.getElementById('categoryName').innerHTML = options;
+          } else {
+            document.getElementById('categoryName').innerHTML = '<option value="">No event types found</option>';
+          }
+          
+          console.log('Validation data loaded successfully');
+        })
+        .catch(err => {
+          console.error('Error loading disruption categories:', err);
+          document.getElementById('categoryName').innerHTML = '<option value="">Error loading event types</option>';
+        });
+    });
+    
+    // Function to display error messages
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      
+      // Scroll error into view
+      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    // Function to clear error messages
+    function clearError() {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
+    
+    // Reset Form Function
+    function resetForm() {
+      document.getElementById('searchForm').reset();
+      clearError();
+      // Optionally hide results when resetting
+      // document.getElementById('tabsAndContent').classList.remove('show');
+    }
+    
+    // Show tabs and content after search
+    function showTabsAndContent() {
+      document.getElementById('searchPlaceholder').classList.add('hide');
+      document.getElementById('tabsAndContent').classList.add('show');
+    }
+    
+    // Populate Event Impact tab
+    function populateEventImpact(data, eventType, eventDate) {
+      const contentDiv = document.getElementById('event-impact-content');
+      
+      // Check if event type and date were provided
+      if (!eventType || !eventDate) {
+        contentDiv.innerHTML = '<div class="no-results" style="color: #ff4560; font-weight: 500;">⚠️ Please fill in both Event Type and Event Date fields to view companies affected by this disruption event.</div>';
+        return;
+      }
+      
+      // Check if we have company data
+      if (!data['CompanyName'] || data['CompanyName'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No companies found affected by this disruption event.</div>';
+        return;
+      }
+      
+      const companies = data['CompanyName'];
+      
+      // Build HTML with header showing event type and date
+      let html = '<div style="font-weight: 600; margin-bottom: 15px; color: #333;">';
+      html += `Event Type: <span style="color: #007bff;">${eventType}</span><br>`;
+      html += `Event Date: ${eventDate}<br>`;
+      html += `Total Companies Affected: ${companies.length}`;
+      html += '</div>';
+      
+      // Add search bar
+      html += '<div style="margin-bottom: 15px;">';
+      html += '<input type="text" id="eventImpactSearch" placeholder="Search for a company..." ';
+      html += 'style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" ';
+      html += 'oninput="filterEventImpactCompanies(this.value)">';
+      html += '</div>';
+      
+      html += '<div id="eventImpactList" style="max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">#</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Company Name</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="eventImpactTableBody">';
+      
+      companies.forEach((company, index) => {
+        html += `<tr class="event-impact-row" data-company="${company.toLowerCase()}" style="border-bottom: 1px solid #f0f0f0;">`;
+        html += `<td style="padding: 10px 12px; color: #6c757d;">${index + 1}</td>`;
+        html += `<td style="padding: 10px 12px; color: #212529;">${company}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // Filter companies in Event Impact list
+    function filterEventImpactCompanies(searchTerm) {
+      const rows = document.querySelectorAll('.event-impact-row');
+      const lowerSearch = searchTerm.toLowerCase();
+      
+      rows.forEach(row => {
+        const companyName = row.getAttribute('data-company');
+        if (companyName.includes(lowerSearch)) {
+          row.style.display = '';
+          // Highlight matching text if search term exists
+          if (lowerSearch) {
+            row.style.backgroundColor = '#fff3cd';
+          } else {
+            row.style.backgroundColor = '';
+          }
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Populate Company Events tab
+    function populateCompanyEvents(data, companyName, startDate, endDate) {
+      const contentDiv = document.getElementById('company-events-content');
+      
+      // Check if company name was provided
+      if (!companyName) {
+        contentDiv.innerHTML = '<div class="no-results" style="color: #ff4560; font-weight: 500;">⚠️ Please fill in the Company Name field to view all disruption events for this company.</div>';
+        return;
+      }
+      
+      // Check if we have event data
+      if (!data['EventID'] || data['EventID'].length === 0) {
+        contentDiv.innerHTML = `<div class="no-results">No disruption events found for ${companyName} in the selected date range.</div>`;
+        return;
+      }
+      
+      const eventIDs = data['EventID'];
+      const categoryNames = data['CategoryName'];
+      
+      // Build HTML with header and sort dropdown
+      let html = '<div style="font-weight: 600; margin-bottom: 15px; color: #333;">';
+      html += `Company: <span style="color: #007bff;">${companyName}</span><br>`;
+      html += `Date Range: ${startDate} to ${endDate}<br>`;
+      html += `Total Disruption Events: ${eventIDs.length}`;
+      html += '</div>';
+      
+      // Add sort dropdown
+      html += '<div style="margin-bottom: 15px;">';
+      html += '<label for="companyEventSort" style="font-weight: 500; margin-right: 10px;">Sort by:</label>';
+      html += '<select id="companyEventSort" onchange="sortCompanyEvents(this.value)" ';
+      html += 'style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">';
+      html += '<option value="number">Number (#)</option>';
+      html += '<option value="eventid">Event ID</option>';
+      html += '<option value="category">Category</option>';
+      html += '</select>';
+      html += '</div>';
+      
+      html += '<div style="max-height: 450px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table id="companyEventsTable" style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">#</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Event ID</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Category</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="companyEventsTableBody">';
+      
+      eventIDs.forEach((eventId, index) => {
+        const category = categoryNames[index] || 'Unknown';
+        html += `<tr data-eventid="${eventId}" data-category="${category}" data-index="${index}">`;
+        html += `<td style="padding: 10px 12px; color: #6c757d;">${index + 1}</td>`;
+        html += `<td style="padding: 10px 12px; color: #212529; font-weight: 500;">${eventId}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057;">${category}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // Sort Company Events table
+    function sortCompanyEvents(sortBy) {
+      const tbody = document.getElementById('companyEventsTableBody');
+      if (!tbody) return;
+      
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      rows.sort((a, b) => {
+        if (sortBy === 'number') {
+          // Sort by original index (number column)
+          return parseInt(a.getAttribute('data-index')) - parseInt(b.getAttribute('data-index'));
+        } else if (sortBy === 'eventid') {
+          // Sort by Event ID
+          const idA = a.getAttribute('data-eventid');
+          const idB = b.getAttribute('data-eventid');
+          return idA.localeCompare(idB, undefined, { numeric: true });
+        } else if (sortBy === 'category') {
+          // Sort by Category alphabetically
+          const catA = a.getAttribute('data-category');
+          const catB = b.getAttribute('data-category');
+          return catA.localeCompare(catB);
+        }
+        return 0;
+      });
+      
+      // Re-append rows in sorted order and update numbering
+      rows.forEach((row, index) => {
+        row.querySelector('td:first-child').textContent = index + 1;
+        tbody.appendChild(row);
+      });
+    }
+    
+    // Populate Top Distributors tab
+    function populateTopDistributors(data) {
+      const contentDiv = document.getElementById('distributors-content');
+      
+      // Check if we have distributor data
+      if (!data['Distributors Volume'] || data['Distributors Volume'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No distributor data available.</div>';
+        return;
+      }
+      
+      const distributors = data['Distributors Volume'];
+      const volumes = data['TotalShipmentVolume'];
+      
+      // Build HTML with search bar and scrollable table
+      let html = '<div style="margin-bottom: 15px;">';
+      html += '<input type="text" id="distributorsSearch" placeholder="Search for a company..." ';
+      html += 'style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" ';
+      html += 'oninput="filterDistributors(this.value)">';
+      html += '</div>';
+      
+      html += '<div style="font-weight: 600; margin-bottom: 10px; color: #333;">';
+      html += `Total Distributors: ${distributors.length}`;
+      html += '</div>';
+      
+      html += '<div style="max-height: 450px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">#</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Distributor</th>';
+      html += '<th style="padding: 12px; text-align: right; font-weight: 600; color: #495057;">Total Shipment Volume</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="distributorsTableBody">';
+      
+      distributors.forEach((distributor, index) => {
+        const volume = volumes[index] || 0;
+        html += `<tr class="distributor-row" data-distributor="${distributor.toLowerCase()}" style="border-bottom: 1px solid #f0f0f0;">`;
+        html += `<td style="padding: 10px 12px; color: #6c757d;">${index + 1}</td>`;
+        html += `<td style="padding: 10px 12px; color: #212529;">${distributor}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: right; font-weight: 500;">${volume.toLocaleString()}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // Filter distributors in Top Distributors list
+    function filterDistributors(searchTerm) {
+      const rows = document.querySelectorAll('.distributor-row');
+      const lowerSearch = searchTerm.toLowerCase();
+      
+      rows.forEach(row => {
+        const distributorName = row.getAttribute('data-distributor');
+        if (distributorName.includes(lowerSearch)) {
+          row.style.display = '';
+          // Highlight matching text if search term exists
+          if (lowerSearch) {
+            row.style.backgroundColor = '#fff3cd';
+          } else {
+            row.style.backgroundColor = '';
+          }
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Populate Delays tab
+    function populateDelays(data) {
+      const contentDiv = document.getElementById('delays-content');
+      
+      // Check if we have delay data
+      if (!data['Distributors Avg'] || data['Distributors Avg'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No distributor delay data available.</div>';
+        return;
+      }
+      
+      const distributors = data['Distributors Avg'];
+      const avgDelays = data['AvgDelayDyas']; // Note: typo in PHP key name
+      
+      // Build HTML with search bar and scrollable table
+      let html = '<div style="margin-bottom: 15px;">';
+      html += '<input type="text" id="delaysSearch" placeholder="Search by company, country, or continent..." ';
+      html += 'style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" ';
+      html += 'oninput="filterDelays(this.value)">';
+      html += '</div>';
+      
+      html += '<div style="font-weight: 600; margin-bottom: 10px; color: #333;">';
+      html += `Total Distributors: ${distributors.length}`;
+      html += '</div>';
+      
+      html += '<div style="max-height: 450px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">#</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Distributor</th>';
+      html += '<th style="padding: 12px; text-align: right; font-weight: 600; color: #495057;">Average Delay (Days)</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="delaysTableBody">';
+      
+      distributors.forEach((distributor, index) => {
+        const avgDelay = avgDelays[index] || 0;
+        html += `<tr class="delay-row" data-distributor="${distributor.toLowerCase()}" style="border-bottom: 1px solid #f0f0f0;">`;
+        html += `<td style="padding: 10px 12px; color: #6c757d;">${index + 1}</td>`;
+        html += `<td style="padding: 10px 12px; color: #212529;">${distributor}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: right; font-weight: 500;">${parseFloat(avgDelay).toFixed(2)}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // Filter delays in Delays list
+    function filterDelays(searchTerm) {
+      const rows = document.querySelectorAll('.delay-row');
+      const lowerSearch = searchTerm.toLowerCase();
+      
+      rows.forEach(row => {
+        const distributorName = row.getAttribute('data-distributor');
+        if (distributorName.includes(lowerSearch)) {
+          row.style.display = '';
+          // Highlight matching text if search term exists
+          if (lowerSearch) {
+            row.style.backgroundColor = '#fff3cd';
+          } else {
+            row.style.backgroundColor = '';
+          }
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Populate Financial Health tab
+    function populateFinancialHealth(data, companyType) {
+      const contentDiv = document.getElementById('financial-health-content');
+      
+      // Check if we have financial health data
+      if (!data['Company Name Fin Health'] || data['Company Name Fin Health'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No financial health data available.</div>';
+        return;
+      }
+      
+      // Data is already filtered by the API based on the type parameter
+      const companies = data['Company Name Fin Health'];
+      const scores = data['Avg Fin Health'].map(val => parseFloat(val) || 0);
+      
+      // Determine if we should show x-axis labels based on number of companies
+      const showXAxisLabels = companies.length < 21;
+      
+      // Build HTML with chart container
+      let html = '';
+      
+      // Only show tip if there are many companies (x-axis labels hidden)
+      if (!showXAxisLabels) {
+        html += '<div style="margin-bottom: 10px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; color: #1565c0; font-size: 14px;">';
+        html += '<strong> Tip:</strong> Hover over each bar to see the company name and average health score.';
+        html += '</div>';
+      }
+      
+      html += '<div id="financialHealthChart" style="width: 100%; height: 500px;"></div>';
+      contentDiv.innerHTML = html;
+      
+      // Render chart
+      renderFinancialHealthChart(companies, scores, showXAxisLabels);
+    }
+    
+    function renderFinancialHealthChart(companies, scores, showXAxisLabels) {
+      const chartContainer = document.getElementById('financialHealthChart');
+      if (!chartContainer) return;
+      
+      // Create bar chart with ApexCharts
+      const options = {
+        series: [{
+          name: 'Average Health Score',
+          data: scores
+        }],
+        chart: {
+          type: 'bar',
+          height: 500,
+          toolbar: {
+            show: true
+          }
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '70%'
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        xaxis: {
+          categories: companies,
+          title: {
+            text: 'Company'
+          },
+          labels: {
+            show: showXAxisLabels,
+            rotate: -45,
+            rotateAlways: true,
+            trim: false,
+            hideOverlappingLabels: false,
+            maxHeight: 120,
+            style: {
+              fontSize: '11px'
+            }
+          }
+        },
+        yaxis: {
+          title: {
+            text: 'Average Financial Health Score'
+          },
+          labels: {
+            formatter: function(val) {
+              return val.toFixed(2);
+            }
+          }
+        },
+        colors: ['#00E396'],
+        title: {
+          text: 'Company Financial Health (Sorted Greatest to Least)',
+          align: 'left',
+          style: {
+            fontSize: '16px',
+            fontWeight: 600
+          }
+        },
+        tooltip: {
+          custom: function({series, seriesIndex, dataPointIndex, w}) {
+            const company = companies[dataPointIndex];
+            const score = series[seriesIndex][dataPointIndex];
+            return '<div style="padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 4px;">' +
+              '<div style="font-weight: 600; margin-bottom: 5px;">' + company + '</div>' +
+              '<div>Average Health Score: <strong>' + score.toFixed(2) + '</strong></div>' +
+              '</div>';
+          }
+        },
+        grid: {
+          borderColor: '#e7e7e7'
+        }
+      };
+      
+      const chart = new ApexCharts(chartContainer, options);
+      chart.render();
+    }
+    
+    // Populate Company Financials tab
+    function populateFinancials(data, regionalType, regionValue, startDate, endDate) {
+      const contentDiv = document.getElementById('financials-content');
+      
+      // Check if region was provided
+      if (!regionalType || !regionValue) {
+        contentDiv.innerHTML = '<div class="no-results" style="color: #ff4560; font-weight: 500;">⚠️ Please select a Region Type (Continent or Country) and provide the region value to view company financials data.</div>';
+        return;
+      }
+      
+      // Check if we have financial data
+      if (!data['Company Name Fin Reg'] || data['Company Name Fin Reg'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No company financials data available for this region.</div>';
+        return;
+      }
+      
+      const companies = data['Company Name Fin Reg'];
+      const quarters = data['Quater Fin Reg'];
+      const years = data['Year Fin Reg'];
+      const healthScores = data['Health Score Fin Reg'];
+      
+      // Build HTML with header and search bar
+      let html = '<div style="font-weight: 600; margin-bottom: 15px; color: #333;">';
+      html += `Region: <span style="color: #007bff;">${regionValue}</span> (${regionalType})<br>`;
+      html += `Date Range: ${startDate} to ${endDate}<br>`;
+      html += `Total Companies: ${companies.length}`;
+      html += '</div>';
+      
+      html += '<div class="row" style="margin-bottom: 15px;">';
+      html += '<div class="col-md-6">';
+      html += '<input type="text" id="financialsSearch" placeholder="Search for a company..." ';
+      html += 'style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" ';
+      html += 'oninput="filterFinancials()">';
+      html += '</div>';
+      html += '<div class="col-md-3">';
+      html += '<select id="financialsYearFilter" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="filterFinancials()">';
+      html += '<option value="">All Years</option>';
+      
+      // Get unique years and sort them
+      const uniqueYears = [...new Set(years)].sort((a, b) => b - a);
+      uniqueYears.forEach(year => {
+        html += `<option value="${year}">${year}</option>`;
+      });
+      
+      html += '</select>';
+      html += '</div>';
+      html += '<div class="col-md-3">';
+      html += '<select id="financialsQuarterFilter" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="filterFinancials()">';
+      html += '<option value="">All Quarters</option>';
+      html += '<option value="1">Q1</option>';
+      html += '<option value="2">Q2</option>';
+      html += '<option value="3">Q3</option>';
+      html += '<option value="4">Q4</option>';
+      html += '</select>';
+      html += '</div>';
+      html += '</div>';
+      
+      html += '<div style="max-height: 450px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">#</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Company Name</th>';
+      html += '<th style="padding: 12px; text-align: center; font-weight: 600; color: #495057;">Quarter</th>';
+      html += '<th style="padding: 12px; text-align: center; font-weight: 600; color: #495057;">Year</th>';
+      html += '<th style="padding: 12px; text-align: right; font-weight: 600; color: #495057;">Health Score</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="financialsTableBody">';
+      
+      companies.forEach((company, index) => {
+        const quarter = quarters[index] || 'N/A';
+        const year = years[index] || 'N/A';
+        const healthScore = healthScores[index] || 0;
+        
+        // Extract just the number from quarter (e.g., "Q1" -> "1", or "1" -> "1")
+        const quarterNumber = quarter === 'N/A' ? 'N/A' : quarter.toString().replace('Q', '');
+        const displayQuarter = quarter === 'N/A' ? 'N/A' : `Q${quarterNumber}`;
+        
+        html += `<tr class="financials-row" data-company="${company.toLowerCase()}" data-year="${year}" data-quarter="${quarterNumber}" style="border-bottom: 1px solid #f0f0f0;">`;
+        html += `<td style="padding: 10px 12px; color: #6c757d;">${index + 1}</td>`;
+        html += `<td style="padding: 10px 12px; color: #212529;">${company}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: center;">${displayQuarter}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: center;">${year}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: right; font-weight: 500;">${parseFloat(healthScore).toFixed(2)}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // Filter financials in Financials list
+    function filterFinancials() {
+      const rows = document.querySelectorAll('.financials-row');
+      const searchInput = document.getElementById('financialsSearch');
+      const yearFilter = document.getElementById('financialsYearFilter');
+      const quarterFilter = document.getElementById('financialsQuarterFilter');
+      
+      const lowerSearch = searchInput ? searchInput.value.toLowerCase() : '';
+      const selectedYear = yearFilter ? yearFilter.value : '';
+      const selectedQuarter = quarterFilter ? quarterFilter.value : '';
+      
+      rows.forEach(row => {
+        const companyName = row.getAttribute('data-company');
+        const year = row.getAttribute('data-year');
+        const quarter = row.getAttribute('data-quarter');
+        
+        // Priority: Company, then Year, then Quarter
+        let showRow = true;
+        
+        // Company filter (highest priority)
+        if (lowerSearch && !companyName.includes(lowerSearch)) {
+          showRow = false;
+        }
+        
+        // Year filter (second priority)
+        if (showRow && selectedYear && year !== selectedYear) {
+          showRow = false;
+        }
+        
+        // Quarter filter (third priority)
+        if (showRow && selectedQuarter && quarter !== selectedQuarter) {
+          showRow = false;
+        }
+        
+        if (showRow) {
+          row.style.display = '';
+          // Highlight matching text if search term exists
+          if (lowerSearch) {
+            row.style.backgroundColor = '#fff3cd';
+          } else {
+            row.style.backgroundColor = '';
+          }
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Populate Criticality tab
+    function populateCriticality(data) {
+      const contentDiv = document.getElementById('criticality-content');
+      
+      // Check if we have criticality data
+      if (!data['Company Criticality'] || data['Company Criticality'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No criticality data available.</div>';
+        return;
+      }
+      
+      const companies = data['Company Criticality'];
+      const criticalityScores = data['Criticality'];
+      
+      // Build HTML with search bar and scrollable table
+      let html = '<div style="margin-bottom: 15px;">';
+      html += '<input type="text" id="criticalitySearch" placeholder="Search for a company..." ';
+      html += 'style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" ';
+      html += 'oninput="filterCriticality(this.value)">';
+      html += '</div>';
+      
+      html += '<div style="font-weight: 600; margin-bottom: 10px; color: #333;">';
+      html += `Total Companies: ${companies.length}`;
+      html += '</div>';
+      
+      html += '<div style="max-height: 450px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">#</th>';
+      html += '<th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Company Name</th>';
+      html += '<th style="padding: 12px; text-align: right; font-weight: 600; color: #495057;">Criticality Score</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="criticalityTableBody">';
+      
+      companies.forEach((company, index) => {
+        const score = criticalityScores[index] || 0;
+        html += `<tr class="criticality-row" data-company="${company.toLowerCase()}" style="border-bottom: 1px solid #f0f0f0;">`;
+        html += `<td style="padding: 10px 12px; color: #6c757d;">${index + 1}</td>`;
+        html += `<td style="padding: 10px 12px; color: #212529;">${company}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: right; font-weight: 500;">${parseFloat(score).toFixed(2)}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+    }
+    
+    // Filter criticality in Criticality list
+    function filterCriticality(searchTerm) {
+      const rows = document.querySelectorAll('.criticality-row');
+      const lowerSearch = searchTerm.toLowerCase();
+      
+      rows.forEach(row => {
+        const companyName = row.getAttribute('data-company');
+        if (companyName.includes(lowerSearch)) {
+          row.style.display = '';
+          // Highlight matching text if search term exists
+          if (lowerSearch) {
+            row.style.backgroundColor = '#fff3cd';
+          } else {
+            row.style.backgroundColor = '';
+          }
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+    
+    // Populate Regional Disruption tab
+    function populateRegionalDisruption(data, regionalType, regionValue) {
+      const contentDiv = document.getElementById('regional-disruption-content');
+      
+      // Check if region was provided
+      if (!regionalType || !regionValue) {
+        contentDiv.innerHTML = '<div class="no-results" style="color: #ff4560; font-weight: 500;">⚠️ Please select a Region Type (Continent or Country) and provide the region value to view regional disruption data.</div>';
+        return;
+      }
+      
+      // Check if we have disruption data
+      if (!data['DisruptionCount'] || data['DisruptionCount'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No disruption data available for this region.</div>';
+        return;
+      }
+      
+      // Process disruption count data to get total disruptions by region
+      // DisruptionCount should contain region and disruption count information
+      const disruptionData = data['DisruptionCount'];
+      
+      // Build RRC-style data structure for heatmap
+      // The API should return data in a format we can map
+      let rrcData = [];
+      
+      if (regionalType === 'Continent') {
+        rrcData.push({
+          continent: regionValue,
+          "rrc value": disruptionData.length // Use disruption count as intensity
+        });
+      } else if (regionalType === 'Country') {
+        rrcData.push({
+          country: regionValue,
+          "rrc value": disruptionData.length // Use disruption count as intensity
+        });
+      }
+      
+      // Build HTML
+      let html = '<div style="font-weight: 600; margin-bottom: 15px; color: #333;">';
+      html += `Region: <span style="color: #007bff;">${regionValue}</span> (${regionalType})`;
+      html += '</div>';
+      
+      // Heatmap container
+      html += '<div id="regionalDisruptionHeatmap" style="width: 100%; height: 450px; margin-bottom: 30px; border: 1px solid #e0e0e0; border-radius: 4px;"></div>';
+      
+      // Sorted list of disruptions
+      html += '<h5 style="font-weight: 600; margin-bottom: 15px; color: #333;">Disruption Details</h5>';
+      
+      // Parse period data and extract year and month
+      const periodDataArray = [];
+      disruptionData.forEach(item => {
+        const period = item.period || 'Unknown';
+        const count = parseFloat(item.disruptionCount) || 0;
+        
+        // Parse period (format: "YYYY-MM" or similar)
+        let year = 'Unknown';
+        let month = 'Unknown';
+        
+        if (period !== 'Unknown') {
+          const parts = period.split('-');
+          if (parts.length >= 2) {
+            year = parts[0];
+            month = parts[1];
+          }
+        }
+        
+        periodDataArray.push({
+          period: period,
+          year: year,
+          month: month,
+          count: count
+        });
+      });
+      
+      // Calculate median for high impact threshold
+      const allCounts = periodDataArray.map(item => item.count);
+      const sortedCounts = allCounts.sort((a, b) => a - b);
+      const median = sortedCounts[Math.floor(sortedCounts.length / 2)];
+      
+      // Mark high impact and sort by date (period)
+      periodDataArray.forEach(item => {
+        item.highImpact = item.count > median ? item.count : 0;
+      });
+      
+      // Sort by period (date) in descending order
+      periodDataArray.sort((a, b) => {
+        if (a.period === 'Unknown') return 1;
+        if (b.period === 'Unknown') return -1;
+        return b.period.localeCompare(a.period);
+      });
+      
+      // Get unique years and months for filters
+      const uniqueYears = [...new Set(periodDataArray.map(item => item.year))].filter(y => y !== 'Unknown').sort((a, b) => b.localeCompare(a));
+      const uniqueMonths = [...new Set(periodDataArray.map(item => item.month))].filter(m => m !== 'Unknown').sort();
+      
+      // Add filter dropdowns
+      html += '<div class="row" style="margin-bottom: 15px;">';
+      html += '<div class="col-md-6">';
+      html += '<select id="regionalDisruptionYearFilter" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="filterRegionalDisruption()">';
+      html += '<option value="">All Years</option>';
+      uniqueYears.forEach(year => {
+        html += `<option value="${year}">${year}</option>`;
+      });
+      html += '</select>';
+      html += '</div>';
+      html += '<div class="col-md-6">';
+      html += '<select id="regionalDisruptionMonthFilter" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="filterRegionalDisruption()">';
+      html += '<option value="">All Months</option>';
+      uniqueMonths.forEach(month => {
+        const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(month) - 1] || month;
+        html += `<option value="${month}">${monthName}</option>`;
+      });
+      html += '</select>';
+      html += '</div>';
+      html += '</div>';
+      
+      html += '<div style="max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">';
+      html += '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead style="position: sticky; top: 0; background: #f8f9fa; border-bottom: 2px solid #dee2e6; z-index: 1;">';
+      html += '<tr><th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Period</th>';
+      html += '<th style="padding: 12px; text-align: right; font-weight: 600; color: #495057;">Total Disruptions</th>';
+      html += '<th style="padding: 12px; text-align: right; font-weight: 600; color: #495057;">High Impact Disruptions</th></tr>';
+      html += '</thead>';
+      html += '<tbody id="regionalDisruptionTableBody">';
+      
+      periodDataArray.forEach(item => {
+        html += `<tr class="regional-disruption-row" data-year="${item.year}" data-month="${item.month}" style="border-bottom: 1px solid #f0f0f0;">`;
+        html += `<td style="padding: 10px 12px; color: #212529;">${item.period}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: right; font-weight: 500;">${item.count.toFixed(0)}</td>`;
+        html += `<td style="padding: 10px 12px; color: #495057; text-align: right; font-weight: 500;">${item.highImpact.toFixed(0)}</td>`;
+        html += '</tr>';
+      });
+      
+      html += '</tbody></table></div>';
+      
+      contentDiv.innerHTML = html;
+      
+      // Create heatmap using the chart-utils function
+      createRRCMap('regionalDisruptionHeatmap', rrcData, countryToISO3, continentCountries);
+    }
+    
+    // Filter regional disruption list by year and month
+    function filterRegionalDisruption() {
+      const rows = document.querySelectorAll('.regional-disruption-row');
+      const yearFilter = document.getElementById('regionalDisruptionYearFilter');
+      const monthFilter = document.getElementById('regionalDisruptionMonthFilter');
+      
+      const selectedYear = yearFilter ? yearFilter.value : '';
+      const selectedMonth = monthFilter ? monthFilter.value : '';
+      
+      rows.forEach(row => {
+        const year = row.getAttribute('data-year');
+        const month = row.getAttribute('data-month');
+        
+        let showRow = true;
+        
+        // Year filter
+        if (selectedYear && year !== selectedYear) {
+          showRow = false;
+        }
+        
+        // Month filter
+        if (showRow && selectedMonth && month !== selectedMonth) {
+          showRow = false;
+        }
+        
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+    
+    // Populate Frequency tab
+    function populateFrequency(data) {
+      const contentDiv = document.getElementById('frequency-content');
+      
+      // Check if we have disruption count data
+      if (!data['DisruptionCount'] || data['DisruptionCount'].length === 0) {
+        contentDiv.innerHTML = '<div class="no-results">No disruption frequency data available.</div>';
+        return;
+      }
+      
+      // DisruptionCount is an array of objects with 'period' and 'disruptionCount' properties
+      const disruptionCountData = data['DisruptionCount'];
+      
+      // Extract periods for x-axis
+      const categories = disruptionCountData.map(item => item.period);
+      
+      // Extract disruption counts for y-axis and convert to numbers
+      const frequencies = disruptionCountData.map(item => parseFloat(item.disruptionCount) || 0);
+      
+      // Build HTML with chart container
+      let html = '<div id="frequencyChart" style="width: 100%; height: 400px;"></div>';
+      contentDiv.innerHTML = html;
+      
+      // Create line chart with ApexCharts
+      const options = {
+        series: [{
+          name: 'Disruption Frequency',
+          data: frequencies
+        }],
+        chart: {
+          type: 'line',
+          height: 400,
+          toolbar: {
+            show: true
+          }
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 3
+        },
+        markers: {
+          size: 5,
+          hover: {
+            size: 7
+          }
+        },
+        xaxis: {
+          categories: categories,
+          title: {
+            text: 'Time Period'
+          },
+          labels: {
+            rotate: -45,
+            rotateAlways: true,
+            style: {
+              fontSize: '10px'
+            }
+          }
+        },
+        yaxis: {
+          title: {
+            text: 'Frequency'
+          },
+          labels: {
+            formatter: function(val) {
+              return Math.round(val);
+            }
+          }
+        },
+        colors: ['#008FFB'],
+        title: {
+          text: 'Disruption Frequency Over Time',
+          align: 'left',
+          style: {
+            fontSize: '16px',
+            fontWeight: 600
+          }
+        },
+        tooltip: {
+          y: {
+            formatter: function(val) {
+              return val + ' disruptions';
+            }
+          }
+        },
+        grid: {
+          borderColor: '#e7e7e7'
+        }
+      };
+      
+      const chart = new ApexCharts(document.querySelector('#frequencyChart'), options);
+      chart.render();
+    }
+    
+    // Search Function (Original functionality preserved)
+    function showCustomer(event) {
+      //https://code-boxx.com/javascript-fetch-get-query-params/
+      
+      // Prevent default form submission
+      if (event) {
+        event.preventDefault();
+      }
+      
+      // Clear previous error message
+      clearError();
+      
+      // Get date values
+      var xt = document.getElementById("date1").value;
+      var yt = document.getElementById("date2").value;
+      
+      // Set default dates if not provided
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // If no end date provided, use today
+      if (!yt) {
+        yt = today.toISOString().split('T')[0];
+        document.getElementById("date2").value = yt;
+      }
+      
+      // If no start date provided, use 2019-01-01 (start of database)
+      if (!xt) {
+        const dbStartDate = '2019-01-01';
+        xt = dbStartDate;
+        document.getElementById("date1").value = dbStartDate;
+      }
+      
+      const startDate = new Date(xt);
+      const endDate = new Date(yt);
+      
+      // Validate dates
+      if (endDate < startDate) {
+        showError("The ending date cannot be before the starting date.");
+        return;
+      }
+      
+      if (startDate > today) {
+        showError("The starting date cannot be after today's date.");
+        return;
+      }
+      
+      if (endDate > today) {
+        showError("The ending date cannot be after today's date.");
+        return;
+      }
+      
+      // Validate company name if provided
+      const companyInput = document.getElementById("companyName");
+      if (companyInput && companyInput.value.trim() !== "") {
+        const enteredCompany = companyInput.value.trim();
+        
+        if (companyList.length === 0) {
+          showError("Please wait for company data to load before searching.");
+          return;
+        }
+        
+        if (!companyList.includes(enteredCompany)) {
+          showError("Company '" + enteredCompany + "' not found in database. Please check the spelling and try again.");
+          return;
+        }
+      }
+      
+      // Validate country name if provided and field is visible
+      const countryInput = document.getElementById("country");
+      const regionalSelect = document.getElementById("regional");
+      
+      // Only validate if "Country" is selected in Region Type dropdown
+      if (regionalSelect && regionalSelect.value === "Country" && countryInput && countryInput.value.trim() !== "") {
+        const enteredCountry = countryInput.value.trim();
+        
+        if (countryList.length === 0) {
+          showError("Please wait for country data to load before searching.");
+          return;
+        }
+        
+        if (!countryList.includes(enteredCountry)) {
+          showError("Country '" + enteredCountry + "' not found in database. Please check the spelling and try again.");
+          return;
+        }
+      }
+      
+      // Validate that both event type and event date are filled if either is filled
+      const eventTypeInput = document.getElementById("categoryName");
+      const eventDateInput = document.getElementById("eventDate");
+      const eventTypeValue = eventTypeInput ? eventTypeInput.value.trim() : "";
+      const eventDateValue = eventDateInput ? eventDateInput.value.trim() : "";
+      
+      if ((eventTypeValue && !eventDateValue) || (!eventTypeValue && eventDateValue)) {
+        showError("Both Event Type and Event Date must be filled in if either is filled in.");
+        return;
+      }
+      
+      var feilds = ["companyName","type", "tier", "regional", "continent", "country","eventDate", "date1", "date2", "categoryName"];
+      var inputs = {};
+      for (var key = 0; key < feilds.length; key++) {
+        if (document.getElementById(feilds[key])) {
+          if (document.getElementById(feilds[key]).value != "") {
+            inputs[feilds[key]] = document.getElementById(feilds[key]).value;
+          }
+        }
+      }
+      
+      // Ensure dates are in inputs (in case defaults were used)
+      inputs["date1"] = xt;
+      inputs["date2"] = yt;
+      
+      console.log(inputs);
+      
+      // Show tabs and content area when search is performed
+      showTabsAndContent();
+      
+      var xhttp;
+      xhttp = new XMLHttpRequest();
+      xhttp.onload = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var temp = JSON.parse(this.responseText);
+          console.log(temp);
+          
+          // Populate Event Impact tab if event data is available
+          populateEventImpact(temp, eventTypeValue, eventDateValue);
+          
+          // Populate Company Events tab if company data is available
+          const companyInput = document.getElementById("companyName");
+          const companyValue = companyInput ? companyInput.value.trim() : "";
+          populateCompanyEvents(temp, companyValue, xt, yt);
+          
+          // Populate Top Distributors tab (no date input needed)
+          populateTopDistributors(temp);
+          
+          // Populate Delays tab
+          populateDelays(temp);
+          
+          // Populate Frequency tab
+          populateFrequency(temp);
+          
+          // Populate Criticality tab
+          populateCriticality(temp);
+          
+          // Populate Company Financials tab
+          const regionalType = document.getElementById('regional').value;
+          const regionValue = regionalType === 'Continent' 
+            ? document.getElementById('continent').value 
+            : document.getElementById('country').value;
+          populateFinancials(temp, regionalType, regionValue, xt, yt);
+          
+          // Populate Regional Disruption tab
+          populateRegionalDisruption(temp, regionalType, regionValue);
+          
+          // Populate Financial Health tab
+          const companyTypeInput = document.getElementById('type');
+          const companyType = companyTypeInput ? companyTypeInput.value : '';
+          populateFinancialHealth(temp, companyType);
+        }
+      };
+      //https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString
+      //https://attacomsian.com/blog/javascript-convert-object-to-query-string-parameters
+      var url = "senoir_manager.php?" + new URLSearchParams(inputs).toString();
+      console.log(url);
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+
+    // Highlight active navbar link
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPage = window.location.pathname.split('/').pop() || 'ajax_senoir_manager.html';
+      const navLinks = document.querySelectorAll('.top-navbar .nav-link');
+      
+      navLinks.forEach(link => {
+        const linkPage = link.getAttribute('href');
+        if (linkPage && linkPage !== '#' && linkPage.includes(currentPage)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
