@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="styles.css?v=5" />
+
+  <style>
+    /* Force form fields to stack vertically */
+    #companyForm label {
+      display: block;
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+    #companyForm input,
+    #companyForm select {
+      margin-bottom: 0;
+      height: 50px;
+    }
+  </style>
+
+  <title>Add Company</title>
+</head>
+
+<body class="senior-dashboard">
+
+  <!-- Top Navbar -->
+  <nav class="top-navbar">
+    <div class="navbar-logo">
+      <img src="logo.png" alt="INSERT LOGO HERE" />
+    </div>
+    <div class="navbar-actions">
+      <a href="ajax_senoir_manager.html" class="nav-link">Dashboard</a>
+      <a href="ajax_addcompany.html" class="nav-link active">Add a Company</a>
+      <a href="login_page_josie.html" class="nav-link logout-link">Log Out</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content" style="margin-left: 0; width: 100%;">
+    <div id="wrapper">
+      <div class="content-area">
+        <div class="container-fluid">
+
+          <!-- Page Title --> 
+          <h3>Add New Company</h3>
+
+          <div class="mt-3">
+            <div class="box shadow" style="padding: 30px;">
+              <form id="companyForm">
+                <div class="row">
+                  <div class="col-md-12">
+                    <label>Company Name:
+                      <input type="text" id="companyName" placeholder="Enter company name" required>
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <label>Company Type:
+                      <select id="type" required onchange="toggleFactoryCapacity()">
+                        <option value="">Select type</option>
+                        <option value="Manufacturer">Manufacturer</option>
+                        <option value="Distributor">Distributor</option>
+                        <option value="Retailer">Retailer</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Tier:
+                      <select id="tier" required>
+                        <option value="">Select tier</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="row" id="factoryCapacityField" style="display: none;">
+                  <div class="col-md-12">
+                    <label>Factory Capacity:
+                      <input type="number" id="FactoryCapacity" placeholder="Enter factory capacity">
+                    </label>
+                  </div>
+                </div>
+                
+                <hr class="form-section-divider">
+                
+                <div class="section-title">Location Information</div>
+                
+                <div class="row">
+                  <div class="col-md-4">
+                    <label>City:
+                      <input type="text" id="city" placeholder="Enter city" required>
+                    </label>
+                  </div>
+                  <div class="col-md-4">
+                    <label>Country:
+                      <input type="text" id="country" placeholder="Enter country" required>
+                    </label>
+                  </div>
+                  <div class="col-md-4">
+                    <label>Continent:
+                      <select id="continent" required>
+                        <option value="">Select continent</option>
+                        <option value="Asia">Asia</option>
+                        <option value="Africa">Africa</option>
+                        <option value="Europe">Europe</option>
+                        <option value="North America">North America</option>
+                        <option value="South America">South America</option>
+                        <option value="Oceania">Oceania</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+                
+                <input type="submit" value="Add Company">
+              </form>
+              
+              <div id="errorMessage" class="mt-3" style="color: red; display: none;"></div>
+              <div id="result" class="result-message"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies for tab functionality -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+// Fetch company list for validation
+let companyList = [];
+
+fetch('company_info_output.php?q=2019-01-01|' + new Date().toISOString().split('T')[0] + '|')
+  .then(response => response.json())
+  .then(data => {
+    if (data["Company List All:"]) {
+      companyList = data["Company List All:"];
+      console.log('Loaded company list:', companyList.length, 'companies');
+    }
+  })
+  .catch(err => {
+    console.error('Error loading company list:', err);
+  });
+
+// Toggle factory capacity field based on company type
+function toggleFactoryCapacity() {
+  const typeSelect = document.getElementById('type');
+  const capacityField = document.getElementById('factoryCapacityField');
+  const capacityInput = document.getElementById('FactoryCapacity');
+  
+  if (typeSelect.value === 'Manufacturer') {
+    capacityField.style.display = 'block';
+    capacityInput.required = true;
+  } else {
+    capacityField.style.display = 'none';
+    capacityInput.required = false;
+    capacityInput.value = '';
+  }
+}
+
+// Company form
+document.getElementById('companyForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    
+    const resultDiv = document.getElementById('result');
+    const errorDiv = document.getElementById('errorMessage');
+    
+    // Clear previous messages
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    // Get all form values
+    const companyName = document.getElementById('companyName').value.trim();
+    const type = document.getElementById('type').value;
+    const tier = document.getElementById('tier').value;
+    const capacity = document.getElementById('FactoryCapacity').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const continent = document.getElementById('continent').value;
+    
+    // Validate all required fields are filled
+    if (!companyName) {
+        errorDiv.textContent = 'Please enter a company name.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (!type) {
+        errorDiv.textContent = 'Please select a company type.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (!tier) {
+        errorDiv.textContent = 'Please select a tier.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate factory capacity for manufacturers
+    if (type === 'Manufacturer') {
+        if (capacity === '' || isNaN(capacity) || parseFloat(capacity) <= 0) {
+            errorDiv.textContent = 'Factory capacity must be a positive number for manufacturers.';
+            errorDiv.style.display = 'block';
+            return;
+        }
+    }
+    
+    if (!city) {
+        errorDiv.textContent = 'Please enter a city.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (!country) {
+        errorDiv.textContent = 'Please enter a country.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (!continent) {
+        errorDiv.textContent = 'Please select a continent.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate company name doesn't already exist
+    if (companyList.length > 0 && companyList.includes(companyName)) {
+        errorDiv.textContent = 'Company "' + companyName + '" already exists in database. Please choose a different name.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    resultDiv.className = 'loading';
+    resultDiv.style.display = 'block';
+    resultDiv.innerText = 'Adding company...';
+    
+    const data = {
+        companyName: companyName,
+        type: type,
+        tier: tier,
+        FactoryCapacity: type === 'Manufacturer' ? capacity : '',
+        city: city,
+        country: country,
+        continent: continent
+    };
+    
+    $.ajax({
+        url: 'addcompany.php?' + $.param(data),
+        type: 'GET',
+        success: function(response) {
+            if (response && response.includes('Already Exists')) {
+                errorDiv.textContent = 'Company already exists in database.';
+                errorDiv.style.display = 'block';
+                resultDiv.style.display = 'none';
+            } else {
+                resultDiv.className = 'success';
+                resultDiv.innerText = '✓ Company added successfully!';
+                // Reload page after 12 seconds
+                setTimeout(() => {
+                    location.reload();
+                }, 12000);
+            }
+        },
+        error: function(xhr) {
+            errorDiv.textContent = 'Error: ' + xhr.status + ' ' + xhr.statusText;
+            errorDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+        }
+    });
+});
+
+// Highlight active navbar link
+document.addEventListener('DOMContentLoaded', function() {
+  const currentPage = window.location.pathname.split('/').pop() || 'ajax_addcompany.html';
+  const navLinks = document.querySelectorAll('.top-navbar .nav-link');
+  
+  navLinks.forEach(link => {
+    const linkPage = link.getAttribute('href');
+    if (linkPage && linkPage !== '#' && linkPage.includes(currentPage)) {
+      link.classList.add('active');
+    }
+  });
+});
+</script>
+
+</body>
+</html>
