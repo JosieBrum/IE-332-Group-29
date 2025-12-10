@@ -1,0 +1,120 @@
+<div class="sidebar">
+  <div class="logo">
+    <img src="logo.png" alt="INSERT LOGO HERE" />
+  </div>
+  <ul class="nav-links">
+    <li><a href="company_info_page.php">Company Information</a></li>
+    <li><a href="disruptions_events_page.php">Disruption Events</a></li>
+    <li><a href="company_transactions_page.php">Company Transactions</a></li>
+    <li><a href="distributor_transactions_page.php">Distributor Transactions</a></li>
+    <li><a href="update_company_page.php">Update Company Information</a></li>
+    <li><a href="index.php" style="color: #ff4560;">Log Out</a></li>
+  </ul>
+</div>
+
+<!-- Floating Alerts Widget -->
+<div class="alerts-widget">
+  <button class="alerts-button" onclick="toggleAlertsPanel()" aria-label="Active Alerts">
+    <i class="fa fa-bell"></i>
+    <span class="alerts-badge hidden" id="alertsBadge">0</span>
+  </button>
+  
+  <div class="alerts-panel" id="alertsPanel">
+    <div class="alerts-header">
+      <span>Active Disruptions</span>
+      <button class="alerts-close" onclick="toggleAlertsPanel()" aria-label="Close">&times;</button>
+    </div>
+    <div class="alerts-body" id="alertsBody">
+      <div class="alerts-loading">Loading alerts...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Alerts widget functionality - ensure global scope
+(function() {
+  let alertsData = null;
+  let isPanelOpen = false;
+
+  // Make toggleAlertsPanel globally accessible
+  window.toggleAlertsPanel = function() {
+    isPanelOpen = !isPanelOpen;
+    const panel = document.getElementById('alertsPanel');
+    if (isPanelOpen) {
+      panel.classList.add('show');
+    } else {
+      panel.classList.remove('show');
+    }
+  };
+
+  function fetchAlerts() {
+  fetch('alerts.php')
+    .then(response => response.json())
+    .then(data => {
+      alertsData = data;
+      updateAlertsDisplay(data);
+    })
+    .catch(err => {
+      console.error('Error fetching alerts:', err);
+      document.getElementById('alertsBody').innerHTML = 
+        '<div class="alerts-error">Failed to load alerts</div>';
+    });
+}
+
+function updateAlertsDisplay(data) {
+  const badge = document.getElementById('alertsBadge');
+  const body = document.getElementById('alertsBody');
+  
+  const eventCount = data['Event ID'] ? data['Event ID'].length : 0;
+  
+  // Update badge
+  if (eventCount > 0) {
+    badge.textContent = eventCount;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+  
+  // Update panel content
+  if (eventCount === 0) {
+    body.innerHTML = '<div class="alerts-empty">No active disruptions</div>';
+    return;
+  }
+  
+  let html = '';
+  for (let i = 0; i < eventCount; i++) {
+    const eventId = data['Event ID'][i];
+    const eventDate = data['Event Date'][i];
+    const recoveryDate = data['Event Recovery Date'][i];
+    const eventType = data['Event Type'][i];
+    
+    html += `
+      <div class="alert-item">
+        <div class="alert-item-header">
+          <span class="alert-item-id">Event #${eventId}</span>
+          <span class="alert-item-type">${eventType}</span>
+        </div>
+        <div class="alert-item-date">Started: ${eventDate}</div>
+        <div class="alert-item-recovery">
+          ${recoveryDate ? 'Expected recovery: ' + recoveryDate : 'Recovery date unknown'}
+        </div>
+      </div>
+    `;
+  }
+  
+  body.innerHTML = html;
+}
+
+  // Close panel when clicking outside
+  document.addEventListener('click', function(event) {
+    const widget = document.querySelector('.alerts-widget');
+    if (widget && isPanelOpen && !widget.contains(event.target)) {
+      window.toggleAlertsPanel();
+    }
+  });
+
+  // Fetch alerts on load and refresh every 2 minutes
+  fetchAlerts();
+  setInterval(fetchAlerts, 120000);
+})();
+</script>

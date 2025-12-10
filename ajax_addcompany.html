@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Company Insert Test</title>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            padding: 6px;
+            width: 250px;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f2f2f2;
+            border: 1px solid #ccc;
+            width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Test Company Insert PHP</h2>
+
+<form id="companyForm">
+    <label>Company Name:</label>
+    <input type="text" name="companyName" required>
+
+    <label>Tier Level:</label>
+    <select name="type" required>
+        <option value="">Select Type</option>
+        <option value="Manufacturer">Manufacturer</option>
+        <option value="Distributor">Distributor</option>
+        <option value="Retailer">Retailer</option>
+    </select>
+
+    <label>Tier:</label>
+    <select name="tier" required>
+        <option value="">Select Tier</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+    </select>
+
+    <label>Factory Capacity (only for Manufacturer):</label>
+    <input type="number" name="FactoryCapacity">
+
+    <label>City:</label>
+    <input type="text" name="city" required>
+
+    <label>Country:</label>
+    <input type="text" name="country" required>
+
+    <label>Continent:</label>
+    <input type="text" name="continent" required>
+
+    <br><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<div id="response">Response will appear here…</div>
+
+<script>
+    $("#companyForm").on("submit", function (e) {
+        e.preventDefault();
+
+        // Serialize the form data
+        var formData = $("#companyForm").serialize();
+
+        // Log the URL being generated (for debugging purposes)
+        var url = "addcompany.php?" + formData;
+        console.log("URL being sent: " + url);  // This will log the URL to the console
+
+        // Make the AJAX call
+        $.ajax({
+            url: url,   // Using the URL built from the form data
+            type: "GET",
+            success: function (response) {
+                $("#response").html("<pre>" + response + "</pre>");
+            },
+            error: function (xhr) {
+                $("#response").html("Error: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
